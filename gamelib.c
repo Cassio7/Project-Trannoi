@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <stdbool.h>
+#include <string.h>
 #include "gamelib.h"
 
 struct Giocatore* giocatore=NULL;//creato dinamicamente
@@ -10,18 +10,71 @@ unsigned short quest_da_finire;
 struct Stanza* stanza_inizio;
 struct Stanza* lista_stanze;
 
+char *colore(struct Giocatore* scan){//per far tornare il colore in base alla posizione sull'enum Nome_giocatore
+  static char color[22];
+  switch (scan->player) {
+    case 0:
+           strcpy(color, "rosso");
+           break;
+    case 1:
+           strcpy(color, "blu");
+           break;
+    case 2:
+         strcpy(color, "giallo");
+         break;
+    case 3:
+         strcpy(color, "verde");
+         break;
+    case 4:
+         strcpy(color, "arancione");
+         break;
+    case 5:
+         strcpy(color, "nero");
+         break;
+    case 6:
+         strcpy(color, "viola");
+         break;
+    case 7:
+         strcpy(color, "marrone");
+         break;
+    case 8:
+         strcpy(color, "bianco");
+         break;
+    case 9:
+         strcpy(color, "rosa");
+         break;
+  }
+  return color;
+}
+char *job(struct Giocatore* scan){
+  static char jobb[22];
+  switch (scan->stato) {
+    case 0:
+           strcpy(jobb, "astronauta");
+           break;
+    case 1:
+           strcpy(jobb, "impostore");
+           break;
+    case 2:
+           break;
+    case 3:
+           break;
+  }
+  return jobb;
+}
 void stampa_giocatori(){
-  printf("poggers\n");
-  /*if (primo==NULL)//stampa
+  int flag=1;
+  if (primo==NULL)//stampa
     printf("Nessun giocatore\n");
   else{
       struct Giocatore* scan=primo;
       do {
-        printf("Giocatore numero :%d\n",scan->cock );
+        printf("Giocatore numero %d è di colore %s ed è un %s\n",flag, colore(scan), job(scan));
         scan= scan->next;
+        flag++;
       } while(scan!=NULL);
   }
-  */
+
 }
 void stanza_iniziale(int rando){//inizializzazione della stanza iniziale
   stanza_inizio =(struct Stanza*) malloc(sizeof(struct Stanza));//inizializzazione stanza prinicipale
@@ -133,10 +186,8 @@ else{
   }
 for(int i =0;i<n-1;i++){//n-1 perchè giocatore l'ho già inserito
   struct Giocatore* new = (struct Giocatore*) malloc(sizeof(struct Giocatore));//creazione in mem dinamica dei giocat
-  for (int c = 1; c < n; c++) {//inserimeto dei giocatori in base ad n; parte da 1 perchè 0 (primo)già inserito
-    new->stato=rondo[i];//metto lo stato a posizione n nel new giocatore
-    new->player=rondo1[i];//metto dentro player (colore) a posizione n nel new giocatore
-  }
+    new->stato=rondo[i+1];//metto dentro stato la posizione di i+1 dato che i=0 è già inserito
+    new->player=rondo1[i+1];//metto dentro player(colore) la posizione di i+1 dato che i=0 è già inserito
   new->posizione=stanza_inizio;//puntatore alla stanza_inizio uguale per tutti i giocatori
   if (primo == NULL)
     primo = new;

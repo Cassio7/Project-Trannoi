@@ -7,7 +7,6 @@ struct Giocatore {
     struct Stanza* posizione;
     enum Stato_giocatore stato;
     enum Nome_giocatore player;
-    int cock;
     struct Giocatore* next;
 };
 struct Stanza{
