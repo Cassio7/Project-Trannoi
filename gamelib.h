@@ -17,6 +17,6 @@ struct Stanza{
     enum Tipo_stanza tipo;
     bool emergenza_chiamata;
 };
-extern void imposta_gioco();
-extern void gioca();
-extern void termina_gioco();
+ void imposta_gioco();
+ void gioca();
+ void termina_gioco();

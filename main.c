@@ -6,7 +6,7 @@ void menu(){
   printf("Benvenuti in Trannoi!\n");
   do{
     do {
-      if (flag1)
+      if (flag1)//entra se flag1 è diverso da 0
         printf("\n!!Errore nell'inserimento della scelta!!\n" );
       printf("\nInserisci un numero da 1 a 3 per decidere una di queste opzioni:\n");
       printf("\n1= Imposta il gioco\n2= Gioca\n3= Termina il gioco\n");

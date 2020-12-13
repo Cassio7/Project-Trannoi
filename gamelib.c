@@ -56,14 +56,34 @@ char *job(struct Giocatore* scan){
            strcpy(jobb, "impostore");
            break;
     case 2:
+           strcpy(jobb, "assassinato");
            break;
     case 3:
+           strcpy(jobb, "defenestrato");
            break;
   }
   return jobb;
 }
+char *tipo(struct Giocatore* scan){
+  static char tipoo[22];
+  switch (scan->posizione->tipo) {
+    case 0:
+           strcpy(tipoo, "vuota");
+           break;
+    case 1:
+           strcpy(tipoo, "quest semplice");
+           break;
+    case 2:
+           strcpy(tipoo, "quest complicata");
+           break;
+    case 3:
+           strcpy(tipoo, "botola");
+           break;
+  }
+  return tipoo;
+}
 void stampa_giocatori(){
-  int flag=1;
+  int flag=1;//per il numero giocatore
   if (primo==NULL)//stampa
     printf("Nessun giocatore\n");
   else{
@@ -115,7 +135,27 @@ void nuova_stanza(int rando){//inizializzazione di una nuova stanza
   }
 }
 
+static void avanza(struct Giocatore* scan){
+  printf("joy\n");
+}
+static void esegui_quest(struct Giocatore* scan){
+  printf("joy\n");
+}
+static void chiamata_emergenza(struct Giocatore* scan){
+  printf("joy\n");
+}
+static void uccidi_astronauta(struct Giocatore* scan){
+  printf("joy\n");
+}
+static void usa_botola(struct Giocatore* scan){
+  printf("joy\n");
+}
+static void sabotaggio(struct Giocatore* scan){
+  printf("joy\n");
+}
+
 void imposta_gioco(){//funzione principale ove inizializzo il gioco con creazione della stanza_inizio e giocatori
+termina_gioco();
 int n=0,scelta=0,rando=0;//n=numero di persone, scelta la uso come flag e per la scelta dell'utente, rando=random
 time_t t;//per il random
 srand((unsigned) time(&t));//per il random
@@ -158,8 +198,18 @@ else{
     }
   }
 }
+/*faccio il random delle posizioni dell'array per evitare che gli impostori siano sempre
+  quelli all'inizio, dato che appena trova n impostori tutti gli altri vengono impostati a 0
+  facendp lo shuffle sotto ho più probabilità che venga inserto 1 tra gli ultimi posti
+*/
+for (int i = 0; i < n; i++) {
+  int j = rand()%(i+1);
+  int temp= rondo[i];
+  rondo[i]=rondo[j];
+  rondo[j]=temp;
+}
 /*for (int i = 0; i < n; i++) {
-  printf("Controllo se astronauta o impostore :%d\n",rondo[i] );
+  printf("secondo Controllo se astronauta o impostore :%d\n",rondo[i] );
 }*/
   for (int i = 0; i < n; i++) { // numeri random senza ripetizione per stabilire il Nome_giocatore
     rondo1[i]= rand()%10;
@@ -197,13 +247,13 @@ for(int i =0;i<n-1;i++){//n-1 perchè giocatore l'ho già inserito
   }
 }
 printf("Inserisci il numero di quest da fare per vincere la partita\n");
-scanf("%hu",&quest_da_finire);
+scanf("%hu",&quest_da_finire);//h sta per half (metà di una int e short) e u per unsigned
 scelta=0;
 do {
   printf("Inserisci 1 per stampare tutte le informazioni relative ai giocatori\n");
-  printf("Insersici 2 per iniziare la partita\n");
+  printf("Insersici 2 per iniziare la partita\nInserisci 3 per riimpostare il gioco\n");
   scanf("%d",&scelta);
-} while(scelta <1||scelta>2);
+} while(scelta <1||scelta>3);
 switch (scelta) {
   case 1:
          stampa_giocatori();
@@ -211,12 +261,96 @@ switch (scelta) {
   case 2:
          gioca();
          break;
+  case 3:
+         termina_gioco();
+         imposta_gioco();
+         break;
 }
 }
 
-void gioca(){
-  printf("xd\n");
+void gioca(){//funzione principale per eseguire i comandi di gioco
+  int scelta=0,flag=1,flag1=1;//scelta per menu,flag per il numero del giocatore,flag1 per i giocatori dentro la stanz
+  if (primo==NULL)
+    printf("Nessun giocatore inserito ao\n");
+  else{
+      struct Giocatore* scan=primo;//per ciclare tutti i player e fargli scegliere cosa fare nel loro turno
+      do {
+        printf("\nTurno del giocatore numero %d, di colore %s ed è un %s\n",flag, colore(scan), job(scan));
+        printf("La tua stanza è di tipo: %s e è/sono presente/i :\n\n",tipo(scan));
+        struct Giocatore* temp=primo;//utilizzata per stampare i giocatori presenti nella stanza
+        flag1=1;
+        do {
+          if (scan->posizione==temp->posizione) {//contrll tra il gioca di questo turno e i presenti nella stessa stanz
+            if (flag!=flag1){//controllo per non stampare se stesso tra i presenti in stanza ma solo gli altri giocatori
+              printf("Il Giocatore di colore %s \n",colore(temp));
+              scelta++;
+            }
+          }
+          temp=temp->next;//vado al next giocatore
+          flag1++;
+        } while(temp!=NULL);
+        if (!scelta)//entra solo se scelta è 0
+            printf("Non ci sono giocatori nella tua stanza\n");
+        scelta=0;
+        if (!scan->stato) {//entra quando è 0
+          do {//menu per gl'astronauti
+            printf("\nInserisci 1 per spostarti di stanza\n");
+            printf("Insersici 2 per eseguire una quest\nInserisci 3 per la chiamata di emergenza\n");
+            printf("Scelta: ");
+            scanf("%d",&scelta);
+          } while(scelta <1||scelta>3);
+          switch (scelta) {
+            case 1:
+                   avanza(scan);//passo il puntatore al giocatore
+                   break;
+            case 2:
+                   esegui_quest(scan);//passo il puntatore al giocatore
+                   break;
+            case 3:
+                   chiamata_emergenza(scan);//passo il puntatore al giocatore
+                   break;
+          }
+        }
+        else{
+          if (scan->stato==1) {
+            do {//menu per gl'impostori
+              printf("\nInserisci 1 per spostarti di stanza\nInserisci 2 per la chiamata di emergenza\n");
+              printf("Inserisci 3 per uccidere\nInserisci 4 per usare la botola\nInserisci 5 per sabotare\n");
+              printf("Scelta: ");
+              scanf("%d",&scelta);
+            } while(scelta <1||scelta>5);
+            switch (scelta) {
+              case 1:
+                     avanza(scan);
+                     break;
+              case 2:
+                     chiamata_emergenza(scan);//passo il puntatore al giocatore
+                     break;
+              case 3:
+                     uccidi_astronauta(scan);//passo il puntatore al giocatore
+                     break;
+              case 4:
+                     usa_botola(scan);//passo il puntatore al giocatore
+                     break;
+              case 5:
+                     sabotaggio(scan);//passo il puntatore al giocatore
+                     break;
+            }
+          }
+        }
+        scan= scan->next;
+        flag++;
+      } while(scan!=NULL);
+  }
 }
+
 void termina_gioco(){
-free(giocatore);
+  if (primo!=NULL){
+    free(stanza_inizio);
+    do {
+      struct Giocatore* temp=primo->next;
+      free(primo);
+      primo=temp;
+    } while(primo!=NULL);
+  }
 }
