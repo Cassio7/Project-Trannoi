@@ -3,9 +3,9 @@ Template progetto finale per l'esame di Programmazione Procedurale con Laborator
 
 Inserire
 
-Nome:
+Nome:Alessio
 
-Cognome:
+Cognome:Cassieri
 
 Matricola:
 
