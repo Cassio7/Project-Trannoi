@@ -14,6 +14,7 @@ struct Stanza{
     struct Stanza* destra;
     struct Stanza* sinistra;
     struct Stanza* stanza_precedente;
+    struct Stanza* prox;//la uso solo con lista_stanze
     enum Tipo_stanza tipo;
     bool emergenza_chiamata;
 };

@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <time.h>
 #include <string.h>
+#include <limits.h>
 #include "gamelib.h"
 
 struct Giocatore* giocatore=NULL;//creato dinamicamente
@@ -101,6 +102,7 @@ static void stanza_iniziale(int rando){//inizializzazione della stanza iniziale
   stanza_inizio->avanti=NULL;
   stanza_inizio->sinistra=NULL;
   stanza_inizio->destra=NULL;
+  stanza_inizio->prox=NULL;
   stanza_inizio->stanza_precedente=NULL;
   if (rando>=1&&rando<=30)//da 1 a 30 stanza tipo vuoto
     stanza_inizio->tipo=0;
@@ -123,6 +125,7 @@ static void nuova_stanza(struct Giocatore* scan,int scelta){//inizializzazione d
   nuova->avanti=NULL;
   nuova->sinistra=NULL;
   nuova->destra=NULL;
+  nuova->prox=NULL;
   nuova->stanza_precedente=scan->posizione;
   if (rando>=1&&rando<=30)//da 1 a 30 stanza tipo vuoto
     nuova->tipo=0;
@@ -137,51 +140,45 @@ static void nuova_stanza(struct Giocatore* scan,int scelta){//inizializzazione d
     }
   }
   if (scelta==1) {//è stato scelto avanti
-    do {
-      if (lista_stanze==scan->posizione) {
-        lista_stanze->avanti=nuova;
-        lista_stanze->avanti->stanza_precedente=lista_stanze;
-        lista_stanze=NULL;
-      }
-      else{
-        lista_stanze=lista_stanze->avanti;
-      }
-    } while(lista_stanze!=NULL);
-    lista_stanze=stanza_inizio;
-    scan->posizione->avanti=nuova;
-    scan->posizione=nuova;
+    do{
+    if (lista_stanze->prox==NULL){//va all'ultima posizione dove posso mettere la nuova stanza per farle in fila
+      lista_stanze->prox=nuova;//metto la nuova stanza in fila
+      scan->posizione->avanti=nuova;//metto dentro la posizione attuale la nuova stanza creata per il percorso
+      scan->posizione=nuova;//aggiorno la posizione
+      lista_stanze=NULL;//esco dal ciclo
+    }
+    else{
+      lista_stanze=lista_stanze->prox;//vado alla prossima stanza finche la prox non è NULL
+    }
+  }while (lista_stanze!=NULL);
   }
   else{
     if (scelta==2) {//è stato scelto destra
-      do {
-        if (lista_stanze==scan->posizione) {//
-          lista_stanze->destra=nuova;
-          lista_stanze->destra->stanza_precedente=lista_stanze;
-          lista_stanze=NULL;
-        }
-        else{
-          lista_stanze=lista_stanze->destra;
-        }
-      } while(lista_stanze!=NULL);
-      lista_stanze=stanza_inizio;
-      scan->posizione->destra=nuova;
-      scan->posizione=nuova;
+      do{
+      if (lista_stanze->prox==NULL){
+        lista_stanze->prox=nuova;
+        scan->posizione->destra=nuova;
+        scan->posizione=nuova;
+        lista_stanze=NULL;
+      }
+      else{
+        lista_stanze=lista_stanze->prox;
+      }
+    }while (lista_stanze!=NULL);
     }
     else{
       if (scelta==3) {//è stato scelto sinistra
-        do {
-          if (lista_stanze==scan->posizione) {
-            lista_stanze->sinistra=nuova;
-            lista_stanze->sinistra->stanza_precedente=lista_stanze;
-            lista_stanze=NULL;
-          }
-          else{
-            lista_stanze=lista_stanze->sinistra;
-          }
-        } while(lista_stanze!=NULL);
-        lista_stanze=stanza_inizio;
-        scan->posizione->sinistra=nuova;
-        scan->posizione=nuova;
+        do{
+        if (lista_stanze->prox==NULL){
+          lista_stanze->prox=nuova;
+          scan->posizione->sinistra=nuova;
+          scan->posizione=nuova;
+          lista_stanze=NULL;
+        }
+        else{
+          lista_stanze=lista_stanze->prox;
+        }
+      }while (lista_stanze!=NULL);
       }
     }
   }
@@ -197,83 +194,87 @@ static void avanza(struct Giocatore* scan){//funzione che permette il movimento 
   } while(scelta <1||scelta>4);
   switch (scelta) {
     case 1://permette di muoversi in avanti
-/* controlla in che punto giocatore dentro scan sta tramite lista_stanze, se la stanza dove vuole andare è già
+/* controlla se in posizione, cioè dove si trova, esiste avanti/destra/sinistra, se la stanza dove vuole andare è già
 presente in memoria, aggiorna soltanto la posizione di scan, se invece non esiste la crea tramite la funzione
 nuova_stanza. vale per tutti i case ma cambia se avanti, sinistra, destra.
 */
-           do{
-            if(lista_stanze==scan->posizione){//in quale posizione si trova il giocatore e quando corrisp inizia
-             if (lista_stanze->avanti==NULL) {//vede se esiste la stanza avanti, se è null non esiste
+           //do{
+            //if(lista_stanze==scan->posizione){//in quale posizione si trova il giocatore e quando corrisp inizia
+             if (scan->posizione->avanti==NULL){//vede se esiste la stanza avanti, se è null non esiste
                nuova_stanza(scan,scelta);//crea la nuova stanza e passo il giocatore e la scelta
-               lista_stanze=NULL;//metto la lista a NULL per uscire dal do while
+               //lista_stanze=NULL;//metto la lista a NULL per uscire dal do while
              }
              else{//se la stanza avanti esiste, è presente in memoria basta inserirla in scan->posizione
-               scan->posizione=lista_stanze->avanti;//inserisce la stanza
-               lista_stanze=NULL;//metto la lista a NULL per uscire dal do while
+               scan->posizione=scan->posizione->avanti;//inserisce la stanza
+               //lista_stanze=NULL;//metto la lista a NULL per uscire dal do while
              }
-           }
+           /*}
            else{//se il giocatore non si trova in questa stanza vado alla prossima
-             lista_stanze=lista_stanze->avanti;//vado alla prossima stanza della lista_stanze
+             lista_stanze=lista_stanze->prox;//vado alla prossima stanza della lista_stanze
            }
-         }while (lista_stanze!=NULL);//esco quando lista_stanze è NULL
-         lista_stanze=stanza_inizio;//rimetto lista_stanze all'inizio per un uso futuro
+         }while (lista_stanze!=NULL);//esco quando lista_stanze è NULL*/
            break;
     case 2:
-      do{
-            if(lista_stanze==scan->posizione){
-             if (lista_stanze->destra==NULL) {
+             if (scan->posizione->destra==NULL)
                nuova_stanza(scan,scelta);
-               lista_stanze=NULL;
-             }
-             else{
-               scan->posizione=lista_stanze->destra;
-               lista_stanze=NULL;
-             }
-           }
-           else{
-             lista_stanze=lista_stanze->destra;
-           }
-         }while (lista_stanze!=NULL);
-         lista_stanze=stanza_inizio;
+             else
+               scan->posizione=scan->posizione->destra;
            break;
     case 3:
-      do{
-            if(lista_stanze==scan->posizione){
-             if (lista_stanze->sinistra==NULL) {
+             if (scan->posizione->sinistra==NULL)
                nuova_stanza(scan,scelta);
-               lista_stanze=NULL;
-             }
-             else{
-               scan->posizione=lista_stanze->sinistra;
-               lista_stanze=NULL;
-             }
-           }
-           else{
-             lista_stanze=lista_stanze->sinistra;
-           }
-         }while (lista_stanze!=NULL);
-         lista_stanze=stanza_inizio;
+             else
+               scan->posizione=scan->posizione->sinistra;
            break;
     case 4:
            printf("Rimani fermo\n");
            break;
 }
+lista_stanze=stanza_inizio;
 }
+
 static void esegui_quest(struct Giocatore* scan){
-  printf("joy\n");
+  if (scan->posizione->tipo==1){//controllo se è quest_semplice
+    quest_da_finire--;//scalo di 1
+    scan->posizione->tipo=0;//la metto a vuota
+  }
+  else{
+    if (scan->posizione->tipo==2){//controllo se è quest_compicata
+      quest_da_finire-=2;//scalo di 2
+      scan->posizione->tipo=0;//la metto a vuota
+    }
+    else
+      printf("La stanza in cui ti trovi è di tipo: %s e non esiste una quest\n",tipo(scan));
+  }
 }
+
 static void chiamata_emergenza(struct Giocatore* scan){
   printf("joy\n");
 }
+
 static void uccidi_astronauta(struct Giocatore* scan){
   printf("joy\n");
 }
+
 static void usa_botola(struct Giocatore* scan){
   printf("joy\n");
+  if (scan->posizione->tipo==3){//controllo se è presente una botola
+    do {
+      /*if () {
+
+      }*/
+    } while(lista_stanze!=NULL);
+  }
+  else
+    printf("Non è presente una botola in questa stanza perchè di tipo : %s\n",tipo(scan));
 }
+
 static void sabotaggio(struct Giocatore* scan){
-  printf("joy\n");
-}
+  if (scan->posizione->tipo==1||scan->posizione->tipo==2)//controllo se è quest_semplice o quest_compicata
+    scan->posizione->tipo=0;//la metto a vuota
+  else
+    printf("La stanza in cui ti trovi è di tipo: %s e non può essere sabotata\n",tipo(scan));
+  }
 
 void imposta_gioco(){//funzione principale ove inizializzo il gioco con creazione della stanza_inizio e giocatori
 termina_gioco();
@@ -287,7 +288,7 @@ do {
 int rondo[n], rondo1[n]; //array per inserimento e controllo di numeri per metterli dentro delle enum
 rando=1+rand()%101;//da 1 a 100
 stanza_iniziale(rando);//chiamo una funzione e passo un numero random
-if (n>=4&&n<=6) { // 1 impostore
+if (n>=4&&n<=6) { // massimo 1 impostore
   for (int i = 0; i < n; i++) {
     rondo[i]=rand()%2;
     if (rondo[i]==1) {
@@ -296,10 +297,13 @@ if (n>=4&&n<=6) { // 1 impostore
       scelta++;
     }
   }
-
+  if (scelta==0) {//minimo 1 impostore
+    int i=rand()%n;
+    rondo[i]=1;
+  }
 }
 else{
-  if (n>=7&&n<=9) { // 2 impostori
+  if (n>=7&&n<=9) { // massimo 2 impostori
     for (int i = 0; i < n; i++) {
       rondo[i]=rand()%2;
       if (rondo[i]==1) {
@@ -308,8 +312,12 @@ else{
         scelta++;
       }
     }
+    if (scelta==0) {//minimo 1 impostore
+      int i=rand()%n;
+      rondo[i]=1;
+    }
   }
-  else{ //3 impostori
+  else{ //massimo 3 impostori
     for (int i = 0; i < n; i++) {
       rondo[i]=rand()%2;
       if (rondo[i]==1) {
@@ -317,6 +325,10 @@ else{
           rondo[i]=0;
         scelta++;
       }
+    }
+    if (scelta==0) {//minimo 1 impostore
+      int i=rand()%n;
+      rondo[i]=1;
     }
   }
 }
@@ -392,16 +404,18 @@ switch (scelta) {
 
 void gioca(){//funzione principale per eseguire i comandi di gioco
   int scelta=0,flag=1,flag1=1;//scelta per menu,flag per il numero del giocatore,flag1 per i giocatori dentro la stanz
-for(int i=0;i<3;i++){//ho fatto 3 turni al momento a caso
+do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le quest/gli impostori uccidono tutti finisce
   if (primo==NULL)
     printf("Nessun giocatore inserito ao\n");
   else{
       struct Giocatore* scan=primo;//per ciclare tutti i player e fargli scegliere cosa fare nel loro turno
       do {
+        lista_stanze=stanza_inizio;//resetto la lista stanze all'inizio
         printf("\nTurno del giocatore numero %d, di colore %s ed è un %s\n",flag, colore(scan), job(scan));
         printf("La tua stanza è di tipo: %s e è/sono presente/i :\n\n",tipo(scan));
         struct Giocatore* temp=primo;//utilizzata per stampare i giocatori presenti nella stanza
         flag1=1;
+        scelta=0;
         do {
           if (scan->posizione==temp->posizione) {//contrll tra il gioca di questo turno e i presenti nella stessa stanz
             if (flag!=flag1){//controllo per non stampare se stesso tra i presenti in stanza ma solo gli altri giocatori
@@ -412,7 +426,7 @@ for(int i=0;i<3;i++){//ho fatto 3 turni al momento a caso
           temp=temp->next;//vado al next giocatore
           flag1++;
         } while(temp!=NULL);
-        if (!scelta)//entra solo se scelta è 0
+        if (scelta==0)//entra solo se scelta è 0
             printf("Non ci sono giocatori nella tua stanza\n");
         scelta=0;
         if (!scan->stato) {//entra quando è 0
@@ -463,11 +477,21 @@ for(int i=0;i<3;i++){//ho fatto 3 turni al momento a caso
         }
         scan= scan->next;
         flag++;
+        /*faccio finire il gioco se sono finite le quest: controllo se sono 0 oppure controllo se sono
+        1-2 cioè il max degli unsigned short. Possibile che mi rimanga 1 quest_da_finire ma la finisco
+        in una stanza doppia.
+        */
+        if (quest_da_finire==0||quest_da_finire==USHRT_MAX) {
+          printf("Gli astronauti hanno vinto completando le quest!\n");
+          scan=NULL;//metto NULL per uscire dallo while
+          lista_stanze=NULL;//metto NULL per uscire dallo while
+        }
       } while(scan!=NULL);
   }
   flag=1;
   flag1=1;
-}
+}while(lista_stanze!=NULL);
+termina_gioco();
 }
 
 void termina_gioco(){

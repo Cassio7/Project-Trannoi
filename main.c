@@ -30,6 +30,7 @@ void menu(){
                break;//indica la fine del case
         case 2://apertura case 2
                gioca();
+               flag++;
                break;//indica la fine del case
         case 3://apertura case 3
                termina_gioco();
