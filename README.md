@@ -7,7 +7,9 @@ Nome:Alessio
 
 Cognome:Cassieri
 
-Matricola:
+Matricola:324396
 
 
 ed eventuali note sulla realizzazione del progetto, come nuove funzionalità aggiunte o modificate rispetto al testo del progetto assegnato.
+
+Ho cambiato la funzione usa_botola in modo tale che un impostore può decide dove spostarsi di botola, solo se sono presenti 1 o più botole in più rispetto alla sua in base a dove si trova. Se non ci sono altre stanze di tipo botola oltre alla sua viene spostato random (questo è uguale alla consegna) e se il numero di stanze è uguale ad 1, cioè esiste solo la stanza iniziale, un impostore non si può muovere in nessun'altra stanza dato che non esistono.
