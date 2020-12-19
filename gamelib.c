@@ -89,6 +89,7 @@ static void stampa_giocatori(){
     printf("Nessun giocatore\n");
   else{
       struct Giocatore* scan=primo;
+      printf("\nLa stanza iniziale è di tipo : %s\n",tipo(scan));
       do {
         printf("Giocatore numero %d è di colore %s ed è un %s\n",flag, colore(scan), job(scan));
         scan= scan->next;
@@ -237,14 +238,16 @@ static void esegui_quest(struct Giocatore* scan){
   if (scan->posizione->tipo==1){//controllo se è quest_semplice
     quest_da_finire--;//scalo di 1
     scan->posizione->tipo=0;//la metto a vuota
+    printf("\nÈ stata eseguita una quest_semplice\n");
   }
   else{
     if (scan->posizione->tipo==2){//controllo se è quest_compicata
       quest_da_finire-=2;//scalo di 2
       scan->posizione->tipo=0;//la metto a vuota
+      printf("\nÈ stata eseguita una quest_compicata\n");
     }
     else
-      printf("La stanza in cui ti trovi è di tipo: %s e non esiste una quest\n",tipo(scan));
+      printf("\nLa stanza in cui ti trovi è di tipo: %s e non esiste una quest\n",tipo(scan));
   }
 }
 
@@ -256,24 +259,95 @@ static void uccidi_astronauta(struct Giocatore* scan){
   printf("joy\n");
 }
 
-static void usa_botola(struct Giocatore* scan){
-  printf("joy\n");
+static void usa_botola(struct Giocatore* scan){//l'impostore può scegliere la botola dove andare
+  int sceltaa=0;//usata come flag e per la scelta del player
   if (scan->posizione->tipo==3){//controllo se è presente una botola
+    struct Stanza* botole[20];//usata per salvarmi la posizione delle botole, non conosco la grandezza
+    int num=0;//serve per il numero di botole (e per il numero totale di stanze nella else)
     do {
-      /*if () {
-
-      }*/
+      //se la prima stanza è di tipo botola e non è la stanza del giocatore
+      if (lista_stanze->tipo==3&&lista_stanze!=scan->posizione){
+        botole[num]=lista_stanze;//metto la stanza che trovo in botole
+        num++;//aumento il numero di stnze
+      }
+      lista_stanze=lista_stanze->prox;//vado alla prossima stanza
     } while(lista_stanze!=NULL);
+    lista_stanze=stanza_inizio;//rimetto la lista all'inizio
+    if (num!=0) {//se le stanze sono 1 o più
+      printf("\nSono disponibili %d botole dove andare\n",num);
+      for (int i=0; i<num; i++) {//serve per stampare i giocatori presenti in una stanza con botola
+        sceltaa=0;
+        struct Giocatore* temp=primo;
+        printf("\nNella stanza numero %d e è/sono presente/i\n",i);
+        do {
+          if (botole[i]==temp->posizione) {//controllo se in quella stanza è presente un giocatore
+            printf("Il giocatore di colore : %s\n",colore(temp));
+            sceltaa++;//serve per stampare nessun giocatore in stanza
+          }
+          temp=temp->next;//vado al prox giocatore
+        }while(temp!=NULL);
+        if (sceltaa==0)
+          printf("Non ci sono giocatori in questa stanza\n");
+      }
+      sceltaa=0;
+      do{
+        printf("Inserisci il numero della stanza dove vuoi andare\nScelta: ");
+        scanf("%d",&sceltaa);
+/*la scelta deve essere tra la botola a posizione 0 ed a num non compreso. es: se esiste una sola stanza botola dove
+dove andare la scelta sarà solo 0 ma il num sarà 1 e la stanza 1 non esiste*/
+      }while(sceltaa<0||sceltaa>=num);
+      for (int i=0; i<num; i++) {//for per controllare la scelta con la stanza corrispondente
+        if (sceltaa==i) {//la scelta è uguale alla stanza
+          printf("Hai scelto la stanza %d ed ora ti sposterai in quella stanza\n",i);
+          scan->posizione=botole[i];//scambio posizione
+          i=num;//esco dal ciclo
+        }
+      }
+    }
+    else{//se non esiste una stanza botola oltre alla sua viene mandato random su un'altra stanza
+      printf("\nNon esistono altre stanze di tipo botola tranne la tua, verrai spostato casualmente in una stanza\n");
+      do {
+        num++;
+        lista_stanze=lista_stanze->prox;
+      } while(lista_stanze!=NULL);
+      lista_stanze=stanza_inizio;
+      if (num==1) {//ho fatto il ciclo sopra ma se viene 1 significa che esiste solo la stanza iniziale
+        printf("Esiste solo la stanza iniziale, non puoi spostarti in nessun'altra stanza\n");
+      }
+      else{
+        time_t t;//per il random
+        srand((unsigned) time(&t));//per il random
+        int a=rand()%num,b=0;
+        do {
+          if (a==b){
+            if (lista_stanze->tipo!=3) {
+              scan->posizione=lista_stanze;
+              lista_stanze=NULL;
+              printf("La tua stanza è stata cambiata casualmente\n");
+            }
+            else
+              a=rand()%num;
+          }
+          else{
+            lista_stanze=lista_stanze->prox;
+            b++;
+          }
+        } while(lista_stanze!=NULL);
+        lista_stanze=stanza_inizio;
+      }
+    }
   }
   else
-    printf("Non è presente una botola in questa stanza perchè di tipo : %s\n",tipo(scan));
+    printf("\nNon è presente una botola in questa stanza perchè di tipo : %s\n",tipo(scan));
 }
 
 static void sabotaggio(struct Giocatore* scan){
-  if (scan->posizione->tipo==1||scan->posizione->tipo==2)//controllo se è quest_semplice o quest_compicata
+  if (scan->posizione->tipo==1||scan->posizione->tipo==2){//controllo se è quest_semplice o quest_compicata
     scan->posizione->tipo=0;//la metto a vuota
+    printf("\nLa stanza è stata sabotata!\n");
+  }
   else
-    printf("La stanza in cui ti trovi è di tipo: %s e non può essere sabotata\n",tipo(scan));
+    printf("\nLa stanza in cui ti trovi è di tipo: %s e non può essere sabotata\n",tipo(scan));
   }
 
 void imposta_gioco(){//funzione principale ove inizializzo il gioco con creazione della stanza_inizio e giocatori
@@ -380,11 +454,11 @@ for(int i =0;i<n-1;i++){//n-1 perchè giocatore l'ho già inserito
     primo=new;
   }
 }
-printf("Inserisci il numero di quest da fare per vincere la partita\n");
+printf("\nInserisci il numero di quest da fare per vincere la partita: ");
 scanf("%hu",&quest_da_finire);//h sta per half (metà di una int e short) e u per unsigned
 scelta=0;
 do {
-  printf("Inserisci 1 per stampare tutte le informazioni relative ai giocatori\n");
+  printf("\nInserisci 1 per stampare tutte le informazioni relative ai giocatori\n");
   printf("Insersici 2 per iniziare la partita\nInserisci 3 per riimpostare il gioco\n");
   scanf("%d",&scelta);
 } while(scelta <1||scelta>3);
