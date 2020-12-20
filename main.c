@@ -10,10 +10,9 @@ void menu(){
         printf("\n!!Errore nell'inserimento della scelta!!\n" );
       printf("\nInserisci un numero da 1 a 3 per decidere una di queste opzioni:\n");
       printf("\n1= Imposta il gioco\n2= Gioca\n3= Termina il gioco\n");
-      if (!flag2){
+      if (!flag2){//entra quando flag2 è 0
         do {
-          printf("Per prima cosa è necessario impostare il gioco, inserisci 1:\n");
-          printf("Scelta: " );
+          printf("Per prima cosa è necessario impostare il gioco, inserisci 1:\nScelta: ");
           scanf("%d",&scelta);
         } while(scelta!=1);
         flag2++;
@@ -38,7 +37,7 @@ void menu(){
                flag++;
                break;//indica la fine del case
              }
-     }while(!flag);
+     }while(!flag);//finisce quando flag è diverso da 0
 }
 
 int main() {
