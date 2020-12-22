@@ -18,4 +18,6 @@ ed eventuali note sulla realizzazione del progetto, come nuove funzionalità agg
 
 -Aggiunta la possibilità di tornare indietro di stanza ovviamente se esiste una stanza precedente non NULL, è NULL sono nella stanza iniziale.
 
--Aggiunto un minigame dentro quest_semplice, dove si deve indovinare la sequenza di 5 numeri random da 1 a 5. Inserendo 0 si può lasciare il tentativo e non completare la quest. Un altro giocatore può completare la quest in quella stanza.
+-Aggiunto un minigame dentro quest_semplice, dove si deve inserire il risultato di una somma. Inserendo 0 si può lasciare il tentativo e non completare la quest. Un altro giocatore può completare la quest in quella stanza.
+
+-Aggiunto un minigame dentro quest_comlicata, dove si deve indovinare la sequenza di 5 numeri random da 1 a 5. Inserendo 0 si può lasciare il tentativo e non completare la quest. Un altro giocatore può completare la quest in quella stanza.
