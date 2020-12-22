@@ -5,11 +5,11 @@
 #include <limits.h>
 #include "gamelib.h"
 
-struct Giocatore* primo=NULL;
-unsigned short quest_da_finire;
+struct Giocatore* primo=NULL;//primo giocatore
+unsigned short quest_da_finire;//numero di quest
 int n;//numero dei giocatori
-struct Stanza* stanza_inizio;
-struct Stanza* lista_stanze;
+struct Stanza* stanza_inizio;//stanza iniziale
+struct Stanza* lista_stanze;//lista stanze per lo scorrimento
 
 static char *colore(struct Giocatore* scan){//per far tornare il colore in base alla posizione sull'enum Nome_giocatore
   static char color[22];
@@ -232,48 +232,22 @@ lista_stanze=stanza_inizio;
 
 static void esegui_quest(struct Giocatore* scan){
   if (scan->posizione->tipo==1){//controllo se è quest_semplice
-    int complete=0;
-    printf("\vIndovina la sequenza di 5 numeri per eseguire la quest semplice\n");
+    int complete=0,sceltaa=0;//complete=flag minigame completato,sceltaa=scelta dell'utente
+    printf("\vInserisci il risultato di questa somma per eseguire la quest semplice\n");
     time_t t;//per il random
     srand((unsigned) time(&t));//per il random
-    int seq[5];
-    for (int i = 0; i < 5; i++) { // numeri random senza ripetizione per stabilire il mini-game
-      seq[i]= 1+rand()%5;
-      for (int c = 0; c < i; c++) {
-        if (seq[c]==seq[i]) {
-          i--;
-          c=i;
-        }
-      }
-    }
-    /*for (int i=0;i<5;i++) {//vedere la sequenza
-      printf("%d ",seq[i]);
-    }*/
-    int sceltaa=0;
-    while(complete!=5){//esce quando è 5
-     printf("\nHai la possibilità di uscire dal tentativo inserendo 0, però causa il non completamento della quest\n");
-      for (int i=0;i<5;i++) {
-        printf("\tInserisci il %d° numero\n\tScelta: ",i+1);
-        scanf("%d",&sceltaa);
-        if (sceltaa==0){
-          complete=5;
-          i=5;
-        }
-        else{
-          if (sceltaa==seq[i]){//controllo se il numero inserito è uguale a quello della sequenza
-            printf("\v\tNumero indovinato!\n\t");
-            complete++;//aumento perchè numero indovinato
-            for (int c=0;c<=i;c++) {//stampo i numeri indovinati fino ad ora
-              printf("%d-",seq[c]);
-            }
-          printf("\n");
-          }
-          else{//se numero inserito errato torno indietro al ciclo precedente
-            printf("\v\tNumero errato, riprova\n");
-            i--;
-          }
-        }
-      }
+    int a=1+rand()%100;//primo numero random per la somma
+    int b=1+rand()%100;//secondo numero random per la somma
+    printf("\nHai la possibilità di uscire dal tentativo inserendo 0, però causa il non completamento della quest\n");
+    while (complete!=1) {//esce quando è 1
+      printf("\t%d + %d = ",a,b);
+      scanf("%d",&sceltaa);
+      if (a+b==sceltaa)
+        complete++;
+      else
+        printf("\v\tNumero errato, riprova\n");
+      if (sceltaa==0)
+        complete++;
     }
     if (sceltaa==0)
       printf("\nNon hai completato la quest semplice!\n");
@@ -285,9 +259,52 @@ static void esegui_quest(struct Giocatore* scan){
   }
   else{
     if (scan->posizione->tipo==2){//controllo se è quest_compicata
-      quest_da_finire-=2;//scalo di 2
-      scan->posizione->tipo=0;//la metto a vuota
-      printf("\nÈ stata eseguita una quest_compicata\n");
+      int complete=0,sceltaa=0;//complete=flag minigame completato,sceltaa=scelta dell'utente
+      printf("\vIndovina la sequenza di 5 numeri (da 1 a 5) per eseguire la quest complicata\n");
+      time_t t;//per il random
+      srand((unsigned) time(&t));//per il random
+      int seq[5];
+      for (int i = 0; i < 5; i++) { // numeri random senza ripetizione per stabilire il mini-game
+        seq[i]= 1+rand()%5;
+        for (int c = 0; c < i; c++) {
+          if (seq[c]==seq[i]) {
+            i--;
+            c=i;
+          }
+        }
+      }
+      while(complete!=5){//esce quando è 5
+       printf("\nHai la possibilità di uscire dal tentativo inserendo 0, però causa il non completamento della quest\n");
+        for (int i=0;i<5;i++) {
+          printf("\tInserisci il %d° numero\n\tScelta: ",i+1);
+          scanf("%d",&sceltaa);
+          if (sceltaa==0){
+            complete=5;
+            i=5;
+          }
+          else{
+            if (sceltaa==seq[i]){//controllo se il numero inserito è uguale a quello della sequenza
+              printf("\v\tNumero indovinato!\n\t");
+              complete++;//aumento perchè numero indovinato
+              for (int c=0;c<=i;c++) {//stampo i numeri indovinati fino ad ora
+                printf("%d-",seq[c]);
+              }
+            printf("\n");
+            }
+            else{//se numero inserito errato torno indietro al ciclo precedente
+              printf("\v\tNumero errato, riprova\n");
+              i--;
+            }
+          }
+        }
+      }
+      if (sceltaa==0)
+        printf("\nNon hai completato la quest complicata!\n");
+      else{
+        quest_da_finire-=2;//scalo di 2
+        scan->posizione->tipo=0;//la metto a vuota
+        printf("\nÈ stata eseguita una quest_compicata\n");
+      }
     }
     else
       printf("\nLa stanza in cui ti trovi è di tipo: %s e non esiste una quest\n",tipo(scan));
@@ -405,31 +422,31 @@ static void chiamata_emergenza(struct Giocatore* scan){
 }
 
 static void uccidi_astronauta(struct Giocatore* scan){
-  int sceltaa=0,flag=1;
-  struct Giocatore* temp=primo;
-  struct Giocatore* astro[n];
+  int sceltaa=0,flag=1;//sceltaa=scelta utente,flag=numero degli astronauti(parto da 1 per semplificare scelta)
+  struct Giocatore* temp=primo;//per scorrere i giocatori
+  struct Giocatore* astro[n];//inserisco gli astronauti presenti in stanza
   printf("\nHai selezionatio uccidi astronauta. Nella stessa tua stanza è/sono presente/i\n\n");
   do {
-    if (scan->posizione==temp->posizione&&temp->stato==0) {
+    if (scan->posizione==temp->posizione&&temp->stato==0) {//controllo se sono nella stessa stanza ed è un Astronauta
       printf("Astronauta numero %d ed è di colore %s\n",flag,colore(temp));
-      astro[flag]=temp;
-      flag++;
+      astro[flag]=temp;//mi salvo la posizione in memoria dell'astronauta
+      flag++;//aumento il numero degli astronauti
     }
     temp=temp->next;
   } while(temp!=NULL);
-  temp=primo;
-  if (flag==1)
+  temp=primo;//rimetto all'inizio
+  if (flag==1)//controllo se ci stanno astronauti
     printf("\nNon ci sono astronauti da uccidere in questa stanza\n");
   else{
     do{
     printf("\nInserisci il numero dell'astronauta per ucciderlo\nScelta: ");
     scanf("%d",&sceltaa);
-  }while(sceltaa<1||sceltaa>=flag);
-    for (int i=0; i<flag; i++) {
+  }while(sceltaa<1||sceltaa>=flag);//inserisci il numero del astro che vuoi uccidere
+    for (int i=0; i<flag; i++) {//cerco l'astronauta e cambio il suo stato
       if (sceltaa==i) {
         printf("\nHai ucciso l'astronauta %s\n",colore(astro[i]));
-        astro[i]->stato=2;
-        i=flag;
+        astro[i]->stato=2;//cambio lo stato ad assassinato
+        i=flag;//esco dal ciclo
       }
     }
     int prob=0;
@@ -623,7 +640,7 @@ for (int i = 0; i < n; i++) {
     for (int c = 0; c < i; c++) {
       if (rondo1[c]==rondo1[i]) {
         i--;
-        break;
+        c=i;
       }
     }
   }
@@ -676,7 +693,7 @@ void gioca(){//funzione principale per eseguire i comandi di gioco
   int scelta=0,flag=1,flag1=1;//scelta per menu,flag per il numero del giocatore,flag1 per i giocatori dentro la stanz
 do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le quest/gli impostori uccidono tutti finisce
   if (primo==NULL)
-    printf("Nessun giocatore inserito ao\n");
+    printf("Nessun giocatore inserito\n");
   else{
     struct Giocatore* scan=primo;//per ciclare tutti i player e fargli scegliere cosa fare nel loro turno
       do {
@@ -712,7 +729,7 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
         if (!scan->stato) {//entra quando è 0
           do {//menu per gl'astronauti
             printf("\nInserisci 1 per spostarti di stanza\n");
-            printf("Insersici 2 per eseguire una quest\nInserisci 3 per la chiamata di emergenza\n");
+            printf("Inserisci 2 per eseguire una quest\nInserisci 3 per la chiamata di emergenza\n");
             printf("Scelta: ");
             scanf("%d",&scelta);
           } while(scelta <1||scelta>3);
