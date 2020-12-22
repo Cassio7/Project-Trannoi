@@ -3,16 +3,16 @@
 #include "gamelib.h"
 void menu(){
   int scelta=0, flag=0,flag1=0,flag2=0;
-  printf("Benvenuti in Trannoi!\n");
+  printf("\v\tBenvenuti in Trannoi!\n");
   do{
     do {
       if (flag1)//entra se flag1 è diverso da 0
         printf("\n!!Errore nell'inserimento della scelta!!\n" );
       printf("\nInserisci un numero da 1 a 3 per decidere una di queste opzioni:\n");
-      printf("\n1= Imposta il gioco\n2= Gioca\n3= Termina il gioco\n");
+      printf("\n\t1= Imposta il gioco\n\t2= Gioca\n\t3= Termina il gioco\n");
       if (!flag2){//entra quando flag2 è 0
         do {
-          printf("Per prima cosa è necessario impostare il gioco, inserisci 1:\nScelta: ");
+          printf("\vPer prima cosa è necessario impostare il gioco, inserisci 1:\nScelta: ");
           scanf("%d",&scelta);
         } while(scelta!=1);
         flag2++;
@@ -33,7 +33,7 @@ void menu(){
                break;//indica la fine del case
         case 3://apertura case 3
                termina_gioco();
-               printf("GG WP ALL\n");
+               printf("\vGG WP ALL\v");
                flag++;
                break;//indica la fine del case
              }

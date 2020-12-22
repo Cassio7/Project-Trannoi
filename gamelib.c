@@ -5,7 +5,6 @@
 #include <limits.h>
 #include "gamelib.h"
 
-struct Giocatore* giocatore=NULL;//creato dinamicamente
 struct Giocatore* primo=NULL;
 unsigned short quest_da_finire;
 int n;//numero dei giocatori
@@ -48,7 +47,8 @@ static char *colore(struct Giocatore* scan){//per far tornare il colore in base 
   }
   return color;
 }
-static char *job(struct Giocatore* scan){
+
+static char *job(struct Giocatore* scan){//per far tornare lo stato in base alla posizione sull'enum Stato_giocatore
   static char jobb[22];
   switch (scan->stato) {
     case 0:
@@ -66,7 +66,8 @@ static char *job(struct Giocatore* scan){
   }
   return jobb;
 }
-static char *tipo(struct Giocatore* scan){
+
+static char *tipo(struct Giocatore* scan){//per far tornare il tipo stanza in base alla posizione del giocatore
   static char tipoo[22];
   switch (scan->posizione->tipo) {
     case 0:
@@ -84,7 +85,8 @@ static char *tipo(struct Giocatore* scan){
   }
   return tipoo;
 }
-static void stampa_giocatori(){
+
+static void stampa_giocatori(){//stampa tutti i giocatori
   int flag=1;//per il numero giocatore
   if (primo==NULL)//stampa
     printf("Nessun giocatore\n");
@@ -97,8 +99,8 @@ static void stampa_giocatori(){
         flag++;
       } while(scan!=NULL);
   }
-
 }
+
 static void stanza_iniziale(int rando){//inizializzazione della stanza iniziale
   stanza_inizio =(struct Stanza*) malloc(sizeof(struct Stanza));//inizializzazione stanza prinicipale
   stanza_inizio->avanti=NULL;
@@ -121,9 +123,10 @@ static void stanza_iniziale(int rando){//inizializzazione della stanza iniziale
   }
   lista_stanze=stanza_inizio;
 }
+
 static void nuova_stanza(struct Giocatore* scan,int scelta){//inizializzazione di una nuova stanza
   printf("\nNuova stanza creata\n");
-  int rando=1+rand()%101;//da 1 a 100
+  int rando=1+rand()%100;//da 1 a 100
   struct Stanza *nuova =(struct Stanza*) malloc(sizeof(struct Stanza));//inizializzazione stanza prinicipale
   nuova->avanti=NULL;
   nuova->sinistra=NULL;
@@ -191,57 +194,94 @@ static void nuova_stanza(struct Giocatore* scan,int scelta){//inizializzazione d
 static void avanza(struct Giocatore* scan){//funzione che permette il movimento al giocatore
   int scelta=0;
   do {//menu per scegliere se andare avanti, destra, sinistra o rimanere fermo
-    printf("\nInserisci 1 per spostarti nella stanza avanti\nInserisci 2 per spostarti nella stanza a destra\n");
-    printf("Inserisci 3 per spostarti nella stanza a sinistra\nInserisci 4 per rimanere in questa stanza\n");
-    printf("Scelta: ");
+    printf("\v\tInserisci 1 per spostarti nella stanza avanti\n\tInserisci 2 per spostarti nella stanza a destra\n");
+    printf("\tInserisci 3 per spostarti nella stanza a sinistra\n\tInserisci 4 per rimanere in questa stanza\n");
+    printf("\tInserisci 5 per tornare indietro\n\tScelta: ");
     scanf("%d",&scelta);
-  } while(scelta <1||scelta>4);
+  } while(scelta <1||scelta>5);
   switch (scelta) {
     case 1://permette di muoversi in avanti
-/* controlla se in posizione, cioè dove si trova, esiste avanti/destra/sinistra, se la stanza dove vuole andare è già
-presente in memoria, aggiorna soltanto la posizione di scan, se invece non esiste la crea tramite la funzione
-nuova_stanza. vale per tutti i case ma cambia se avanti, sinistra, destra.
-*/
-           //do{
-            //if(lista_stanze==scan->posizione){//in quale posizione si trova il giocatore e quando corrisp inizia
-             if (scan->posizione->avanti==NULL){//vede se esiste la stanza avanti, se è null non esiste
+             if (scan->posizione->avanti==NULL)//vede se esiste la stanza avanti, se è null non esiste
                nuova_stanza(scan,scelta);//crea la nuova stanza e passo il giocatore e la scelta
-               //lista_stanze=NULL;//metto la lista a NULL per uscire dal do while
-             }
-             else{//se la stanza avanti esiste, è presente in memoria basta inserirla in scan->posizione
+             else//se la stanza avanti esiste, è presente in memoria basta inserirla in scan->posizione
                scan->posizione=scan->posizione->avanti;//inserisce la stanza
-               //lista_stanze=NULL;//metto la lista a NULL per uscire dal do while
-             }
-           /*}
-           else{//se il giocatore non si trova in questa stanza vado alla prossima
-             lista_stanze=lista_stanze->prox;//vado alla prossima stanza della lista_stanze
-           }
-         }while (lista_stanze!=NULL);//esco quando lista_stanze è NULL*/
            break;
-    case 2:
+    case 2://permette di muoversi a destra
              if (scan->posizione->destra==NULL)
                nuova_stanza(scan,scelta);
              else
                scan->posizione=scan->posizione->destra;
            break;
-    case 3:
+    case 3://permette di muoversi a sinistra
              if (scan->posizione->sinistra==NULL)
                nuova_stanza(scan,scelta);
              else
                scan->posizione=scan->posizione->sinistra;
            break;
     case 4:
-           printf("Rimani fermo\n");
+           printf("\vRimani fermo\n");
            break;
+    case 5://per tornare alla stanza precedente, se è NULL significa che siamo nella stanza iniziale
+            if (scan->posizione->stanza_precedente==NULL)
+              printf("\vNon esiste una stanza precedente a quella iniziale\n");
+            else
+              scan->posizione=scan->posizione->stanza_precedente;
 }
 lista_stanze=stanza_inizio;
 }
 
 static void esegui_quest(struct Giocatore* scan){
   if (scan->posizione->tipo==1){//controllo se è quest_semplice
-    quest_da_finire--;//scalo di 1
-    scan->posizione->tipo=0;//la metto a vuota
-    printf("\nÈ stata eseguita una quest_semplice\n");
+    int complete=0;
+    printf("\vIndovina la sequenza di 5 numeri per eseguire la quest semplice\n");
+    time_t t;//per il random
+    srand((unsigned) time(&t));//per il random
+    int seq[5];
+    for (int i = 0; i < 5; i++) { // numeri random senza ripetizione per stabilire il mini-game
+      seq[i]= 1+rand()%5;
+      for (int c = 0; c < i; c++) {
+        if (seq[c]==seq[i]) {
+          i--;
+          c=i;
+        }
+      }
+    }
+    /*for (int i=0;i<5;i++) {//vedere la sequenza
+      printf("%d ",seq[i]);
+    }*/
+    int sceltaa=0;
+    while(complete!=5){//esce quando è 5
+     printf("\nHai la possibilità di uscire dal tentativo inserendo 0, però causa il non completamento della quest\n");
+      for (int i=0;i<5;i++) {
+        printf("\tInserisci il %d° numero\n\tScelta: ",i+1);
+        scanf("%d",&sceltaa);
+        if (sceltaa==0){
+          complete=5;
+          i=5;
+        }
+        else{
+          if (sceltaa==seq[i]){//controllo se il numero inserito è uguale a quello della sequenza
+            printf("\v\tNumero indovinato!\n\t");
+            complete++;//aumento perchè numero indovinato
+            for (int c=0;c<=i;c++) {//stampo i numeri indovinati fino ad ora
+              printf("%d-",seq[c]);
+            }
+          printf("\n");
+          }
+          else{//se numero inserito errato torno indietro al ciclo precedente
+            printf("\v\tNumero errato, riprova\n");
+            i--;
+          }
+        }
+      }
+    }
+    if (sceltaa==0)
+      printf("\nNon hai completato la quest semplice!\n");
+    else{
+      quest_da_finire--;//scalo di 1
+      scan->posizione->tipo=0;//la metto a vuota
+      printf("\nÈ stata eseguita una quest_semplice\n");
+    }
   }
   else{
     if (scan->posizione->tipo==2){//controllo se è quest_compicata
@@ -255,10 +295,10 @@ static void esegui_quest(struct Giocatore* scan){
 }
 
 static void chiamata_emergenza(struct Giocatore* scan){
-  struct Giocatore* temp=primo;
-  struct Giocatore* morto[n];
-  struct Giocatore* astro[n];
-  struct Giocatore* impo[n];
+  struct Giocatore* temp=primo;//per scorrere i giocatori
+  struct Giocatore* morto[n];//per salvare le posizione dei morti
+  struct Giocatore* astro[n];//per salvare la posizione deigli astronauti
+  struct Giocatore* impo[n];//per salvare la posizione degli impostori
   int flag=0,flag1=0,flag2=0;//flag=numero morti,flag1=numero astronauti,flag2=numero impostori;nella stessa stanza
   if(scan->posizione->emergenza==0){//controllo se è già stata effettuata una chiamata emergenza in questa stanza
     printf("Turno del giocatore %s\n",colore(scan));
@@ -416,9 +456,14 @@ static void uccidi_astronauta(struct Giocatore* scan){
 }
 
 static void usa_botola(struct Giocatore* scan){//l'impostore può scegliere la botola dove andare
-  int sceltaa=0;//usata come flag e per la scelta del player
+  int sceltaa=0,numsta=0;//usata come flag e per la scelta del player,numsta=numero stanze in totale fino ad ora
+  do {
+    numsta++;//conto il numero delle stanze
+    lista_stanze=lista_stanze->prox;
+  } while(lista_stanze!=NULL);
+  lista_stanze=stanza_inizio;
   if (scan->posizione->tipo==3){//controllo se è presente una botola
-    struct Stanza* botole[20];//usata per salvarmi la posizione delle botole, non conosco la grandezza
+    struct Stanza* botole[numsta];//usata per salvarmi la posizione delle botole
     int num=0;//serve per il numero di botole (e per il numero totale di stanze nella else)
     do {
       //se la prima stanza è di tipo botola e non è la stanza del giocatore
@@ -565,7 +610,7 @@ else{
 }
 /*faccio il random delle posizioni dell'array per evitare che gli impostori siano sempre
   quelli all'inizio, dato che appena trova n impostori tutti gli altri vengono impostati a 0
-  facendp lo shuffle sotto ho più probabilità che venga inserto 1 tra gli ultimi posti
+  facendo lo shuffle sotto ho più probabilità che venga inserto 1 tra gli ultimi posti
 */
 for (int i = 0; i < n; i++) {
   int j = rand()%(i+1);
@@ -573,9 +618,6 @@ for (int i = 0; i < n; i++) {
   rondo[i]=rondo[j];
   rondo[j]=temp;
 }
-/*for (int i = 0; i < n; i++) {
-  printf("secondo Controllo se astronauta o impostore :%d\n",rondo[i] );
-}*/
   for (int i = 0; i < n; i++) { // numeri random senza ripetizione per stabilire il Nome_giocatore
     rondo1[i]= rand()%10;
     for (int c = 0; c < i; c++) {
@@ -585,15 +627,13 @@ for (int i = 0; i < n; i++) {
       }
     }
   }
-  /*for (int i = 0; i < n; i++) {
-    printf("Colore in base al numero: %d\n",rondo1[i] );
-  }*/
+  struct Giocatore* giocatore=NULL;
   giocatore = (struct Giocatore*) malloc(sizeof(struct Giocatore));//creazione in mem dinamica primo giocatore
   giocatore->stato=rondo[0];//metto il primo stato dentro il primo giocatore
   giocatore->player=rondo1[0];//metto il primo player (colore) dentro il primo giocatore
   giocatore->next=NULL;
   giocatore->posizione=stanza_inizio;//puntatore alla stanza_inizio uguale per tutti i giocatori
-  if (primo == NULL)//in questo caso primo e NULL quindi entra e ci mette il primo giocatore
+  if (primo == NULL)//in questo caso primo è NULL quindi entra e ci mette il primo giocatore
     primo = giocatore;
   else{
     giocatore->next=primo;
@@ -615,8 +655,8 @@ printf("\nInserisci il numero di quest da fare per vincere la partita\nScelta: "
 scanf("%hu",&quest_da_finire);//h sta per half (metà di una int e short) e u per unsigned
 scelta=0;
 do {
-  printf("\nInserisci 1 per stampare tutte le informazioni relative ai giocatori\n");
-  printf("Insersici 2 per iniziare la partita\nInserisci 3 per riimpostare il gioco\nScelta: ");
+  printf("\v\tInserisci 1 per stampare tutte le informazioni relative ai giocatori\n");
+  printf("\tInsersici 2 per iniziare la partita\n\tInserisci 3 per riimpostare il gioco\n\tScelta: ");
   scanf("%d",&scelta);
 } while(scelta <1||scelta>3);
 switch (scelta) {
