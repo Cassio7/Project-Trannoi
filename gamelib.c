@@ -780,11 +780,11 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
         in una stanza doppia.
         */
         if (quest_da_finire==0||quest_da_finire==USHRT_MAX) {
-          printf("\nGli astronauti hanno vinto completando le quest!\n");
+          printf("\vGli astronauti hanno vinto completando le quest!\n");
           scan=NULL;//metto NULL per uscire dallo while
           lista_stanze=NULL;//metto NULL per uscire dallo while
         }
-        int numimpo=0,numastro=0;//numimpostori
+        int numimpo=0,numastro=0;//numimpostori,numastronauti
         temp=primo;
         do{//controllo per vedere se ci sono impostori in partita, se non ce ne stanno = defenestrati
           if (temp->stato==1)
@@ -794,12 +794,12 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
           temp=temp->next;
         } while(temp!=NULL);
         if (numimpo==0) {
-          printf("\nGli astronauti hanno vinto defenestrando tutti gli impostori in partita\n");
+          printf("\vGli astronauti hanno vinto defenestrando tutti gli impostori in partita\n");
           scan=NULL;
           lista_stanze=NULL;
         }
-        if (numastro==0) {
-          printf("\nGli impostori hanno vinto uccidento tutti gli astronauti in partita\n");
+        if (numastro==numimpo) {
+          printf("\vGli impostori hanno vinto dato che il numero degl'impostori è uguale a quello degli astronauti \n");
           scan=NULL;
           lista_stanze=NULL;
         }
