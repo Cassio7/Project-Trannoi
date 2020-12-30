@@ -15,11 +15,11 @@ static char *colore(struct Giocatore* scan){//per far tornare il colore in base 
   static char color[22];
   switch (scan->player) {
     case 0:
-           strcpy(color, "rosso");
-           break;
+         strcpy(color, "rosso");
+         break;
     case 1:
-           strcpy(color, "blu");
-           break;
+         strcpy(color, "blu");
+         break;
     case 2:
          strcpy(color, "giallo");
          break;
@@ -318,7 +318,6 @@ static void chiamata_emergenza(struct Giocatore* scan){
   struct Giocatore* impo[n];//per salvare la posizione degli impostori
   int flag=0,flag1=0,flag2=0;//flag=numero morti,flag1=numero astronauti,flag2=numero impostori;nella stessa stanza
   if(scan->posizione->emergenza==0){//controllo se è già stata effettuata una chiamata emergenza in questa stanza
-    printf("Turno del giocatore %s\n",colore(scan));
   do {
     if (scan->posizione==temp->posizione){//controllo se sono nella stessa staza
       if (temp->stato==2){//controllo per i morti
@@ -366,6 +365,32 @@ static void chiamata_emergenza(struct Giocatore* scan){
     time_t t;//per il random
     srand((unsigned) time(&t));//per il random
     int a=0;
+    /*
+    a=prob+prob1;//metto la somma delle prob dentro a
+    int b=rand()%a;//faccio un numero random tra la somma delle probabilità
+    printf("%d\n",b);
+    if (b<prob) {//se il numero random è minore della prob degli astronauti esce un astronauta da 0 a prob-1
+      a=rand()%flag1;//numero random tra 0 e il numero degli astronauti nella stanza
+      for (int i=0;i<flag1;i++) {
+        if (a==i) {
+          astro[i]->stato=3;
+          printf("\nÈ stato defenestrato randomicamente l'astronauta di colore %s\n",colore(astro[i]));
+          i=flag1;
+        }
+      }
+    }
+    else{
+      if (b>=prob) {//se il numero random è maggiore o uguale alla prob degli astronauti esce un impostore da prob a prob1
+        a=rand()%flag2;//numero random tra 0 e il numero degli imposori nella stanza
+        for (int i=0;i<flag2;i++) {
+          if (a==i) {
+            impo[i]->stato=3;
+            printf("\nÈ stato defenestrato randomicamente l'impostore di colore %s\n",colore(impo[i]));
+            i=flag2;
+          }
+        }
+      }
+    }*/
     if (prob>prob1) {//se la prob degli astronauti è maggiore di quella degli impostori esce un astronauta a caso
       a=rand()%flag1;//numero random tra 0 e il numero degli astronauti nella stanza
       for (int i=0;i<flag1;i++) {
@@ -496,7 +521,7 @@ static void usa_botola(struct Giocatore* scan){//l'impostore può scegliere la b
       for (int i=0; i<num; i++) {//serve per stampare i giocatori presenti in una stanza con botola
         sceltaa=0;
         struct Giocatore* temp=primo;
-        printf("\nNella stanza numero %d e è/sono presente/i\n",i);
+        printf("\nStanza numero %d , è/sono presente/i\n",i+1);//per stampare 1 invece di 0
         do {
           if (botole[i]==temp->posizione) {//controllo se in quella stanza è presente un giocatore
             printf("Il giocatore di colore : %s\n",colore(temp));
@@ -509,14 +534,15 @@ static void usa_botola(struct Giocatore* scan){//l'impostore può scegliere la b
       }
       sceltaa=0;
       do{
-        printf("Inserisci il numero della stanza dove vuoi andare\nScelta: ");
+        printf("\nInserisci il numero della stanza dove vuoi andare\nScelta: ");
         scanf("%d",&sceltaa);
+        sceltaa-=1;//questo perchè preferisco far scegliere all'utente 1 invece che 0 per la prima stanza
 /*la scelta deve essere tra la botola a posizione 0 ed a num non compreso. es: se esiste una sola stanza botola dove
 dove andare la scelta sarà solo 0 ma il num sarà 1 e la stanza 1 non esiste*/
       }while(sceltaa<0||sceltaa>=num);
       for (int i=0; i<num; i++) {//for per controllare la scelta con la stanza corrispondente
         if (sceltaa==i) {//la scelta è uguale alla stanza
-          printf("Hai scelto la stanza %d ed ora ti sposterai in quella stanza\n",i);
+          printf("Hai scelto la stanza %d ed ora ti sposterai in quella stanza\n",i+1);
           scan->posizione=botole[i];//scambio posizione
           i=num;//esco dal ciclo
         }
@@ -690,37 +716,43 @@ switch (scelta) {
 }
 
 void gioca(){//funzione principale per eseguire i comandi di gioco
-  int scelta=0,flag=1,flag1=1;//scelta per menu,flag per il numero del giocatore,flag1 per i giocatori dentro la stanz
+  system("clear");
+  int scelta=0,flag=1;//scelta per menu,flag per il numero del giocatore
 do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le quest/gli impostori uccidono tutti finisce
   if (primo==NULL)
     printf("Nessun giocatore inserito\n");
   else{
     struct Giocatore* scan=primo;//per ciclare tutti i player e fargli scegliere cosa fare nel loro turno
       do {
+        system("clear");
         lista_stanze=stanza_inizio;//resetto la lista stanze all'inizio
         struct Giocatore* temp;//utilizzata per controlli su giocatori presenti nella stanza
         if (scan->stato!=2&&scan->stato!=3){
-        printf("\nTurno del giocatore di colore %s ed è un %s\n",colore(scan), job(scan));
+        printf("\nTurno del giocatore numero %d di colore %s ed è un %s\n",flag,colore(scan), job(scan));
         printf("La tua stanza è di tipo: %s e è/sono presente/i :\n\n",tipo(scan));
         temp=primo;//la metto al primo giocatore
-        flag1=1;
         scelta=0;
         do {
           //controllo per stampare i giocatori presenti nella stessa stanza, solo quelli non uccisi e non defenestrati
           if (scan->posizione==temp->posizione&&temp->stato!=3) {
-            if (flag!=flag1){//controllo per non stampare se stesso tra i presenti in stanza ma solo gli altri giocatori
-              if (temp->stato==2) {
+            if (scan!=temp){//controllo per non stampare se stesso tra i presenti in stanza ma solo gli altri giocatori
+              if (temp->stato==2) {//stampo un morto
                 printf("Il Giocatore di colore %s (%s)\n",colore(temp),job(temp));
                 scelta++;
               }
               else{
-                printf("Il Giocatore di colore %s \n",colore(temp));
-                scelta++;
+                if (scan->stato==1&&temp->stato==1) {
+                  printf("Il Giocatore di colore %s (%s)\n",colore(temp),job(temp));
+                  scelta++;
+                }
+                else{
+                  printf("Il Giocatore di colore %s \n",colore(temp));
+                  scelta++;
+                }
               }
             }
           }
           temp=temp->next;//vado al next giocatore
-          flag1++;
         } while(temp!=NULL);
         temp=primo;//lo rimetto al giocatore iniziale
         if (scelta==0)//entra solo se scelta è 0
@@ -772,13 +804,16 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
             }
           }
         }
+        flag++;
         }
         scan= scan->next;
-        flag++;
         /*faccio finire il gioco se sono finite le quest: controllo se sono 0 oppure controllo se sono
         1-2 cioè il max degli unsigned short. Possibile che mi rimanga 1 quest_da_finire ma la finisco
         in una stanza doppia.
         */
+        printf("\vPremi qualsiasi tasto per finire il turno");
+        while(getchar()!= '\n');//pulisco il buffer
+        getchar();//aspetto che venga inserito qualcosa
         if (quest_da_finire==0||quest_da_finire==USHRT_MAX) {
           printf("\vGli astronauti hanno vinto completando le quest!\n");
           scan=NULL;//metto NULL per uscire dallo while
@@ -806,7 +841,6 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
       } while(scan!=NULL);
   }
   flag=1;
-  flag1=1;
 }while(lista_stanze!=NULL);
 termina_gioco();
 }
@@ -825,4 +859,11 @@ void termina_gioco(){
       stanza_inizio=lista_stanze;
     } while(stanza_inizio!=NULL);
   }
+}
+void scritta(){
+printf("\v\t\t\t▄▄▄▄▄▄▄▄   ▄▄▄·  ▐ ▄  ▐ ▄       ▪  \n\t\t\t");
+printf("•██  ▀▄ █·▐█ ▀█ •█▌▐█•█▌▐█▪     ██ \n\t\t\t");
+printf(" ▐█.▪▐▀▀▄ ▄█▀▀█ ▐█▐▐▌▐█▐▐▌ ▄█▀▄ ▐█·\n\t\t\t");
+printf(" ▐█▌·▐█•█▌▐█ ▪▐▌██▐█▌██▐█▌▐█▌.▐▌▐█▌\n\t\t\t");
+printf(" ▀▀▀ .▀  ▀ ▀  ▀ ▀▀ █▪▀▀ █▪ ▀█▄▀▪▀▀▀\n");
 }

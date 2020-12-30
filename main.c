@@ -3,7 +3,6 @@
 #include "gamelib.h"
 void menu(){
   int scelta=0, flag=0,flag1=0,flag2=0;
-  printf("\v\tBenvenuti in Trannoi!\n");
   do{
     do {
       if (flag1)//entra se flag1 è diverso da 0
@@ -20,6 +19,7 @@ void menu(){
       }
       printf("Scelta: " );
       scanf("%d",&scelta);
+      while (getchar()!= '\n');
       flag1++;
     }while(scelta<1||scelta>3);
     flag1=0;
@@ -41,6 +41,8 @@ void menu(){
 }
 
 int main() {
+  system("clear");
+  scritta();
   menu();
   return 0;
 }
