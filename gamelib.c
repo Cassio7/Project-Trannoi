@@ -5,8 +5,10 @@
 #include <limits.h>
 #include "gamelib.h"
 
+static void scritta_win();
+
 struct Giocatore* primo=NULL;//primo giocatore
-unsigned short quest_da_finire;//numero di quest
+unsigned short int quest_da_finire=0;//numero di quest
 int n;//numero dei giocatori
 struct Stanza* stanza_inizio;//stanza iniziale
 struct Stanza* lista_stanze;//lista stanze per lo scorrimento
@@ -15,34 +17,35 @@ static char *colore(struct Giocatore* scan){//per far tornare il colore in base 
   static char color[22];
   switch (scan->player) {
     case 0:
-         strcpy(color, "rosso");
+//\033 escape sequence, [1;31m = rosso e 1; sta per grassetto,rosso=print a video,[0m=torna al normale
+         strcpy(color, "\033[1;31mrosso\033[0m");
          break;
     case 1:
-         strcpy(color, "blu");
+         strcpy(color, "\033[1;34mblu\033[0m");
          break;
     case 2:
-         strcpy(color, "giallo");
+         strcpy(color, "\033[0;33mgiallo\033[0m");
          break;
     case 3:
-         strcpy(color, "verde");
+         strcpy(color, "\033[1;32mverde\033[0m");
          break;
     case 4:
-         strcpy(color, "arancione");
+         strcpy(color, "\033[1;91marancione\033[0m");
          break;
     case 5:
-         strcpy(color, "nero");
+         strcpy(color, "\033[1;36mciano\033[0m");
          break;
     case 6:
-         strcpy(color, "viola");
+         strcpy(color, "\033[1;95mviola\033[0m");
          break;
     case 7:
-         strcpy(color, "marrone");
+         strcpy(color, "\033[1;33mmarrone\033[0m");
          break;
     case 8:
-         strcpy(color, "bianco");
+         strcpy(color, "\033[1;39mbianco\033[0m");
          break;
     case 9:
-         strcpy(color, "rosa");
+         strcpy(color, "\033[1;35mrosa\033[0m");
          break;
   }
   return color;
@@ -125,7 +128,6 @@ static void stanza_iniziale(int rando){//inizializzazione della stanza iniziale
 }
 
 static void nuova_stanza(struct Giocatore* scan,int scelta){//inizializzazione di una nuova stanza
-  printf("\nNuova stanza creata\n");
   int rando=1+rand()%100;//da 1 a 100
   struct Stanza *nuova =(struct Stanza*) malloc(sizeof(struct Stanza));//inizializzazione stanza prinicipale
   nuova->avanti=NULL;
@@ -192,12 +194,16 @@ static void nuova_stanza(struct Giocatore* scan,int scelta){//inizializzazione d
 }
 
 static void avanza(struct Giocatore* scan){//funzione che permette il movimento al giocatore
-  int scelta=0;
+  int scelta=0, f=0;//scelta per la scelta, f=errore a video
   do {//menu per scegliere se andare avanti, destra, sinistra o rimanere fermo
+    if (f)//entra se f è diverso da 0
+      printf("\n!Errore nell'inserimento!\n");
     printf("\v\tInserisci 1 per spostarti nella stanza avanti\n\tInserisci 2 per spostarti nella stanza a destra\n");
-    printf("\tInserisci 3 per spostarti nella stanza a sinistra\n\tInserisci 4 per rimanere in questa stanza\n");
-    printf("\tInserisci 5 per tornare indietro\n\tScelta: ");
+    printf("\tInserisci 3 per spostarti nella stanza a sinistra\n\tInserisci 4 per tornare indietro\n");
+    printf("\tInserisci 5 per rimanere in questa stanza\n\tScelta: ");
     scanf("%d",&scelta);
+    while(getchar()!= '\n');//pulisco il buffer
+    f++;
   } while(scelta <1||scelta>5);
   switch (scelta) {
     case 1://permette di muoversi in avanti
@@ -219,29 +225,30 @@ static void avanza(struct Giocatore* scan){//funzione che permette il movimento 
                scan->posizione=scan->posizione->sinistra;
            break;
     case 4:
-           printf("\vRimani fermo\n");
+           if (scan->posizione->stanza_precedente==NULL)
+             printf("\vNon esiste una stanza precedente a quella iniziale\n");
+           else
+             scan->posizione=scan->posizione->stanza_precedente;
            break;
     case 5://per tornare alla stanza precedente, se è NULL significa che siamo nella stanza iniziale
-            if (scan->posizione->stanza_precedente==NULL)
-              printf("\vNon esiste una stanza precedente a quella iniziale\n");
-            else
-              scan->posizione=scan->posizione->stanza_precedente;
-}
+           printf("\vRimani fermo\n");
+         }
 lista_stanze=stanza_inizio;
 }
 
 static void esegui_quest(struct Giocatore* scan){
   if (scan->posizione->tipo==1){//controllo se è quest_semplice
-    int complete=0,sceltaa=0;//complete=flag minigame completato,sceltaa=scelta dell'utente
+    int complete=0,sceltaa=999;//complete=flag minigame completato,sceltaa=scelta dell'utente
     printf("\vInserisci il risultato di questa somma per eseguire la quest semplice\n");
     time_t t;//per il random
     srand((unsigned) time(&t));//per il random
     int a=1+rand()%100;//primo numero random per la somma
     int b=1+rand()%100;//secondo numero random per la somma
-    printf("\nHai la possibilità di uscire dal tentativo inserendo 0, però causa il non completamento della quest\n");
+    printf("\nHai la possibilità di uscire dal tentativo inserendo 0\nperò causa il non completamento della quest\n");
     while (complete!=1) {//esce quando è 1
       printf("\t%d + %d = ",a,b);
       scanf("%d",&sceltaa);
+      while(getchar()!= '\n');//pulisco il buffer
       if (a+b==sceltaa)
         complete++;
       else
@@ -274,11 +281,12 @@ static void esegui_quest(struct Giocatore* scan){
         }
       }
       while(complete!=5){//esce quando è 5
-       printf("\nHai la possibilità di uscire dal tentativo inserendo 0, però causa il non completamento della quest\n");
+       printf("\nHai la possibilità di uscire dal tentativo inserendo 9\nperò causa il non completamento della quest\n");
         for (int i=0;i<5;i++) {
           printf("\tInserisci il %d° numero\n\tScelta: ",i+1);
           scanf("%d",&sceltaa);
-          if (sceltaa==0){
+          while(getchar()!= '\n');//pulisco il buffer
+          if (sceltaa==9){
             complete=5;
             i=5;
           }
@@ -303,7 +311,7 @@ static void esegui_quest(struct Giocatore* scan){
       else{
         quest_da_finire-=2;//scalo di 2
         scan->posizione->tipo=0;//la metto a vuota
-        printf("\nÈ stata eseguita una quest_compicata\n");
+        printf("\nÈ stata eseguita una quest compicata\n");
       }
     }
     else
@@ -463,9 +471,14 @@ static void uccidi_astronauta(struct Giocatore* scan){
   if (flag==1)//controllo se ci stanno astronauti
     printf("\nNon ci sono astronauti da uccidere in questa stanza\n");
   else{
+    int f=0;//f=errore a video
     do{
+    if (f)//entra se f è diverso da 0
+      printf("\n!Errore nell'inserimento!\n");
     printf("\nInserisci il numero dell'astronauta per ucciderlo\nScelta: ");
     scanf("%d",&sceltaa);
+    while(getchar()!= '\n');//pulisco il buffer
+    f++;
   }while(sceltaa<1||sceltaa>=flag);//inserisci il numero del astro che vuoi uccidere
     for (int i=0; i<flag; i++) {//cerco l'astronauta e cambio il suo stato
       if (sceltaa==i) {
@@ -533,10 +546,15 @@ static void usa_botola(struct Giocatore* scan){//l'impostore può scegliere la b
           printf("Non ci sono giocatori in questa stanza\n");
       }
       sceltaa=0;
+      int f=0;//f=errore a video
       do{
+        if (f)//entra se f è diverso da 0
+          printf("\n!Errore nell'inserimento!\n");
         printf("\nInserisci il numero della stanza dove vuoi andare\nScelta: ");
         scanf("%d",&sceltaa);
+        while(getchar()!= '\n');//pulisco il buffer
         sceltaa-=1;//questo perchè preferisco far scegliere all'utente 1 invece che 0 per la prima stanza
+        f++;
 /*la scelta deve essere tra la botola a posizione 0 ed a num non compreso. es: se esiste una sola stanza botola dove
 dove andare la scelta sarà solo 0 ma il num sarà 1 e la stanza 1 non esiste*/
       }while(sceltaa<0||sceltaa>=num);
@@ -596,13 +614,17 @@ static void sabotaggio(struct Giocatore* scan){
 
 void imposta_gioco(){//funzione principale ove inizializzo il gioco con creazione della stanza_inizio e giocatori
 termina_gioco();
-int scelta=0,rando=0;//n=numero di persone, scelta la uso come flag e per la scelta dell'utente, rando=random
+int scelta=0,rando=0,f=0;//n=numero di persone, scelta la uso come flag e per la scelta dell'utente, rando=random, f=errore a video
 n=0;
 time_t t;//per il random
 srand((unsigned) time(&t));//per il random
 do {
+  if (f)//entra se f è diverso da 0
+    printf("\n!Errore nell'inserimento!\n");
   printf("\nInserisci il numero di giocatori, il minimo è 4 il massimo è 10\nScelta: ");
   scanf("%d",&n);
+  while(getchar()!= '\n');//pulisco il buffer
+  f++;
 } while(n<4||n>10);//numero tra 4 e 10
 int rondo[n], rondo1[n]; //array per inserimento e controllo di numeri per metterli dentro delle enum
 rando=1+rand()%101;//da 1 a 100
@@ -694,13 +716,25 @@ for(int i =0;i<n-1;i++){//n-1 perchè giocatore l'ho già inserito
     primo=new;
   }
 }
-printf("\nInserisci il numero di quest da fare per vincere la partita\nScelta: ");
-scanf("%hu",&quest_da_finire);//h sta per half (metà di una int e short) e u per unsigned
+f=0;
+do{
+  if (f)//entra se f è diverso da 0
+    printf("\n!Errore nell'inserimento!\n");
+  printf("\nInserisci il numero di quest da fare per vincere la partita\nnon 0 ma non più di 15\nScelta: ");
+  scanf("%hu",&quest_da_finire);//h sta per half (metà di una int è short) e u per unsigned
+  while(getchar()!= '\n');//pulisco il buffer
+  f++;
+}while(quest_da_finire<1||quest_da_finire>15);
 scelta=0;
+f=0;
 do {
+  if (f)//entra se f è diverso da 0
+    printf("\n!Errore nell'inserimento!\n");
   printf("\v\tInserisci 1 per stampare tutte le informazioni relative ai giocatori\n");
-  printf("\tInsersici 2 per iniziare la partita\n\tInserisci 3 per riimpostare il gioco\n\tScelta: ");
+  printf("\tInserisci 2 per iniziare la partita\n\tInserisci 3 per riimpostare il gioco\n\tScelta: ");
   scanf("%d",&scelta);
+  while(getchar()!= '\n');//pulisco il buffer
+  f++;
 } while(scelta <1||scelta>3);
 switch (scelta) {
   case 1:
@@ -717,7 +751,7 @@ switch (scelta) {
 
 void gioca(){//funzione principale per eseguire i comandi di gioco
   system("clear");
-  int scelta=0,flag=1;//scelta per menu,flag per il numero del giocatore
+  int scelta=0,flag=1,f=0;//scelta per menu,flag per il numero del giocatore,f=errore a video
 do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le quest/gli impostori uccidono tutti finisce
   if (primo==NULL)
     printf("Nessun giocatore inserito\n");
@@ -758,12 +792,17 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
         if (scelta==0)//entra solo se scelta è 0
             printf("Non ci sono giocatori nella tua stanza\n");
         scelta=0;
+        f=0;
         if (!scan->stato) {//entra quando è 0
-          do {//menu per gl'astronauti
+          do {//menu per gli astronauti
+            if (f)//entra se f è diverso da 0
+              printf("\n!Errore nell'inserimento!\n");
             printf("\nInserisci 1 per spostarti di stanza\n");
             printf("Inserisci 2 per eseguire una quest\nInserisci 3 per la chiamata di emergenza\n");
             printf("Scelta: ");
             scanf("%d",&scelta);
+            while(getchar()!= '\n');//pulisco il buffer
+            f++;
           } while(scelta <1||scelta>3);
           switch (scelta) {
             case 1:
@@ -779,11 +818,14 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
         }
         else{
           if (scan->stato==1) {
-            do {//menu per gl'impostori
+            do {//menu per gli impostori
+              if (f)//entra se f è diverso da 0
+                printf("\n!Errore nell'inserimento!\n");
               printf("\nInserisci 1 per spostarti di stanza\nInserisci 2 per la chiamata di emergenza\n");
               printf("Inserisci 3 per uccidere\nInserisci 4 per usare la botola\nInserisci 5 per sabotare\n");
               printf("Scelta: ");
               scanf("%d",&scelta);
+              while(getchar()!= '\n');//pulisco il buffer
             } while(scelta <1||scelta>5);
             switch (scelta) {
               case 1:
@@ -805,19 +847,22 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
           }
         }
         flag++;
+        printf("\vPremi invio per terminare il turno---");
+        getchar();//aspetto che venga inserito qualcosa
         }
         scan= scan->next;
         /*faccio finire il gioco se sono finite le quest: controllo se sono 0 oppure controllo se sono
         1-2 cioè il max degli unsigned short. Possibile che mi rimanga 1 quest_da_finire ma la finisco
         in una stanza doppia.
         */
-        printf("\vPremi qualsiasi tasto per finire il turno");
-        while(getchar()!= '\n');//pulisco il buffer
-        getchar();//aspetto che venga inserito qualcosa
         if (quest_da_finire==0||quest_da_finire==USHRT_MAX) {
+          system("clear");
           printf("\vGli astronauti hanno vinto completando le quest!\n");
           scan=NULL;//metto NULL per uscire dallo while
           lista_stanze=NULL;//metto NULL per uscire dallo while
+          scritta_win();
+          //while(getchar()!= '\n');//pulisco il buffer
+          getchar();//aspetto che venga inserito qualcosa
         }
         int numimpo=0,numastro=0;//numimpostori,numastronauti
         temp=primo;
@@ -829,20 +874,27 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
           temp=temp->next;
         } while(temp!=NULL);
         if (numimpo==0) {
+          system("clear");
           printf("\vGli astronauti hanno vinto defenestrando tutti gli impostori in partita\n");
           scan=NULL;
           lista_stanze=NULL;
+          printf("\vPremi invio per terminare questa partita e tornare al menù---");
+          //while(getchar()!= '\n');//pulisco il buffer
+          getchar();//aspetto che venga inserito qualcosa
         }
         if (numastro==numimpo) {
-          printf("\vGli impostori hanno vinto dato che il numero degl'impostori è uguale a quello degli astronauti \n");
+          system("clear");
+          printf("\vGli impostori hanno vinto dato che il numero degli impostori è uguale a quello degli astronauti \n");
           scan=NULL;
           lista_stanze=NULL;
+          printf("\vPremi invio per terminare questa partita e tornare al menù---");
+          //while(getchar()!= '\n');//pulisco il buffer
+          getchar();//aspetto che venga inserito qualcosa
         }
       } while(scan!=NULL);
   }
   flag=1;
 }while(lista_stanze!=NULL);
-termina_gioco();
 }
 
 void termina_gioco(){
@@ -861,9 +913,26 @@ void termina_gioco(){
   }
 }
 void scritta(){
-printf("\v\t\t\t▄▄▄▄▄▄▄▄   ▄▄▄·  ▐ ▄  ▐ ▄       ▪  \n\t\t\t");
+printf("\v\t\t\t\033[1;31m▄▄▄▄▄▄▄▄   ▄▄▄·  ▐ ▄  ▐ ▄       ▪  \n\t\t\t");
 printf("•██  ▀▄ █·▐█ ▀█ •█▌▐█•█▌▐█▪     ██ \n\t\t\t");
 printf(" ▐█.▪▐▀▀▄ ▄█▀▀█ ▐█▐▐▌▐█▐▐▌ ▄█▀▄ ▐█·\n\t\t\t");
 printf(" ▐█▌·▐█•█▌▐█ ▪▐▌██▐█▌██▐█▌▐█▌.▐▌▐█▌\n\t\t\t");
-printf(" ▀▀▀ .▀  ▀ ▀  ▀ ▀▀ █▪▀▀ █▪ ▀█▄▀▪▀▀▀\n");
+printf(" ▀▀▀ .▀  ▀ ▀  ▀ ▀▀ █▪▀▀ █▪ ▀█▄▀▪▀▀▀\033[0m\n");
+}
+
+static void scritta_win(){
+printf("\v\t⠄⠄⢀⣠⣴⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣦⣄⡀⠄\n\t");
+printf("⠄⠄⢸⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣶\n\t");
+printf("⠄⠄⠰⣿⠿⢋⣉⣀⣀⣤⣤⣭⣽⣿⣿⣿⣿⣿⣿⣿⣿⠟⠛⠛⠿⠿⢿⣿\n\t");
+printf("⠄⣠⣾⣿⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣦⣤⡙\n\t");
+printf("⢠⣿⣿⣿⣟⣉⣡⣀⣂⣰⣬⣙⣿⣿⣿⣿⣿⣿⣿⣿⠟⣛⡛⣛⠛⠿⢿⣿\n\t");
+printf("⣾⣿⣿⣿⣿⣿⣿⣭⣭⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠶⠶⢾⣦⣬⣿\n\t");
+printf("⢹⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n\t");
+printf("⠄⠙⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠛⠛⠻⠿⠿⠿⠿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n\t");
+printf("⠄⠄⠄⠈⠻⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣶⣤⣶⣦⣿⣿⣿⣿⣿⣿⣿⣿⠿\n\t");
+printf("⣄⠄⠄⠄⠄⠸⣿⣿⣿⡿⠿⠟⠛⠉⠙⠛⠛⠛⠿⣿⣿⣿⣿⣿⠟⠉⠁⠄\n\t");
+printf("⣿⡆⠄⠄⡀⠄⣿⡇⠈⠒⠄⠄⠄⠄⠄⠄⠄⠄⠄⠘⠛⣿⣿⠋⢀⠠⠄⢀\n\t");
+printf("⣿⣿⠄⠄⠄⢾⣿⣿⣷⠄⠹⣷⣤⣤⣄⣀⣠⣶⣶⣦⣾⣿⡿⠄⠄⠄⢠⣾\n\t");
+printf("⣿⣿⡆⠄⠄⠈⠙⢿⣉⠄⠄⠉⠻⠿⢿⣿⠿⠋⠉⣿⣿⣟⣥⠄⢀⣰⣿⣿\n\t");
+printf("⣿⣿⣧⡀⠄⠄⠄⠄⠻⠶⠄⢠⡄⠄⠄⠄⠄⢰⣿⠿⢉⣿⣿⣴⣾⣿⣿⣿\n\t");
 }

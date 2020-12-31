@@ -1,6 +1,6 @@
 
 enum Stato_giocatore{astronauta,impostore,assassinato,defenestrato};
-enum Nome_giocatore{rosso,blu,giallo,verde,arancione,nero,viola,marrone,bianco,rosa};
+enum Nome_giocatore{rosso,blu,giallo,verde,arancione,ciano,viola,marrone,bianco,rosa};
 enum Tipo_stanza{vuota,quest_semplice,quest_compicata,botola};
 enum Emergenza_chiamata{noeffettuata, effettuata};
 struct Giocatore {
