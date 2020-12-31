@@ -23,3 +23,5 @@ ed eventuali note sulla realizzazione del progetto, come nuove funzionalità agg
 -Aggiunto un minigame dentro quest_semplice, dove si deve inserire il risultato di una somma. Inserendo 0 si può lasciare il tentativo e non completare la quest. Un altro giocatore può completare la quest in quella stanza.
 
 -Aggiunto un minigame dentro quest_comlicata, dove si deve indovinare la sequenza di 5 numeri random da 1 a 5. Inserendo 0 si può lasciare il tentativo e non completare la quest. Un altro giocatore può completare la quest in quella stanza.
+
+-Dentro chiamata di emergenza ci sta un pezzo di codice commentato. Ho creato 2 tipi di probabilità di espulsione differenti dato che non sapevo quele dei 2 utilizzare. Quello attivo ora confronta la probabilità e elimina chi ce l'ha più alta tra imp e astro. L'altro è più randominco.
