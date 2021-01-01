@@ -6,6 +6,8 @@
 #include "gamelib.h"
 
 static void scritta_win();
+static void scritta_winimp();
+static void scritta_winast();
 
 struct Giocatore* primo=NULL;//primo giocatore
 unsigned short int quest_da_finire=0;//numero di quest
@@ -52,7 +54,7 @@ static char *colore(struct Giocatore* scan){//per far tornare il colore in base 
 }
 
 static char *job(struct Giocatore* scan){//per far tornare lo stato in base alla posizione sull'enum Stato_giocatore
-  static char jobb[22];
+  static char jobb[13];
   switch (scan->stato) {
     case 0:
            strcpy(jobb, "astronauta");
@@ -71,7 +73,7 @@ static char *job(struct Giocatore* scan){//per far tornare lo stato in base alla
 }
 
 static char *tipo(struct Giocatore* scan){//per far tornare il tipo stanza in base alla posizione del giocatore
-  static char tipoo[22];
+  static char tipoo[18];
   switch (scan->posizione->tipo) {
     case 0:
            strcpy(tipoo, "vuota");
@@ -604,12 +606,48 @@ dove andare la scelta sarà solo 0 ma il num sarà 1 e la stanza 1 non esiste*/
 }
 
 static void sabotaggio(struct Giocatore* scan){
-  if (scan->posizione->tipo==1||scan->posizione->tipo==2){//controllo se è quest_semplice o quest_compicata
-    scan->posizione->tipo=0;//la metto a vuota
-    printf("\nLa stanza è stata sabotata!\n");
+  int sceltaa=9999,flag=0,numsta=0;
+  if (scan->posizione->tipo==1||scan->posizione->tipo==2) {
+    do {
+      numsta++;//conto il numero delle stanze
+      lista_stanze=lista_stanze->prox;
+    } while(lista_stanze!=NULL);
+    lista_stanze=stanza_inizio;
+    struct Stanza* sabota[numsta];//per salvare la posizione delle stanze con tipo 1 o 2
+    printf("\nLista di stanze che puoi sabotare:\n\n");
+    do{
+  /*potevo fare una if singola ma per stampare il tipo uso tipo() ma gli devo passare il puntatore al giocatore, in questo caso dovrei passare
+  soltanto la stanza, quindi stampo a mano */
+      if (lista_stanze->tipo==1) {//stanze di tipo quest semplcie
+        sabota[flag]=lista_stanze;//salvo la stanza
+        printf("La stanza numero %d di tipo quest semplice\n",flag+1);
+        flag++;
+      }
+      if (lista_stanze->tipo==2) {//stanze di tipo quest complicata
+        sabota[flag]=lista_stanze;//salvo la stanza
+        printf("La stanza numero %d di tipo quest complicata\n",flag+1);
+        flag++;
+      }
+      if (scan->posizione==lista_stanze)
+        printf("(La stanza numero %d è dove ti trovi ora)\n",flag);
+      lista_stanze=lista_stanze->prox;
+    }while(lista_stanze!=NULL);
+    lista_stanze=stanza_inizio;
+    int f=0;
+    do {
+      if (f)//entra se f è diverso da 0
+        printf("\n!Errore nell'inserimento!\n");
+      printf("\nInserisci il numero della stanza da sabotare\nScelta:");
+      scanf("%d",&sceltaa);
+      while(getchar()!= '\n');//pulisco il buffer
+      sceltaa-=1;//questo perchè preferisco far scegliere all'utente 1 invece che 0 per la prima stanza
+      f++;
+    }while(sceltaa<0||sceltaa>=flag);
+    sabota[sceltaa]->tipo=0;//metto la stanza scelta a vuota
+    printf("\nHai sabotato la stanza numero %d ed ora è vuota\n",sceltaa+1);
   }
   else
-    printf("\nLa stanza in cui ti trovi è di tipo: %s e non può essere sabotata\n",tipo(scan));
+    printf("\nLa stanza in cui ti trovi è di tipo: %s e non pui utilizzare sabota\n",tipo(scan));
   }
 
 void imposta_gioco(){//funzione principale ove inizializzo il gioco con creazione della stanza_inizio e giocatori
@@ -752,6 +790,11 @@ switch (scelta) {
 void gioca(){//funzione principale per eseguire i comandi di gioco
   system("clear");
   int scelta=0,flag=1,f=0;//scelta per menu,flag per il numero del giocatore,f=errore a video
+  printf("\v\t\t\t\033[1;31m   !!!ATTENZIONE!!!\033[0m\n\n\n");
+  printf("Se il giocatore cerca di fare un'azione che non può (tipo eseguire una quest \nin una stanza vuota)\n");
+  printf("la mossa viene contata come effettuata ed il turno finirà subito dopo\n");
+  getchar();//aspetto che venga inserito qualcosa
+  system("clear");
 do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le quest/gli impostori uccidono tutti finisce
   if (primo==NULL)
     printf("Nessun giocatore inserito\n");
@@ -827,6 +870,7 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
               scanf("%d",&scelta);
               while(getchar()!= '\n');//pulisco il buffer
             } while(scelta <1||scelta>5);
+
             switch (scelta) {
               case 1:
                      avanza(scan);
@@ -844,6 +888,7 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
                      sabotaggio(scan);//passo il puntatore al giocatore
                      break;
             }
+
           }
         }
         flag++;
@@ -861,7 +906,7 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
           scan=NULL;//metto NULL per uscire dallo while
           lista_stanze=NULL;//metto NULL per uscire dallo while
           scritta_win();
-          //while(getchar()!= '\n');//pulisco il buffer
+          printf("\vPremi invio per terminare questa partita e tornare al menù---");
           getchar();//aspetto che venga inserito qualcosa
         }
         int numimpo=0,numastro=0;//numimpostori,numastronauti
@@ -878,17 +923,17 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
           printf("\vGli astronauti hanno vinto defenestrando tutti gli impostori in partita\n");
           scan=NULL;
           lista_stanze=NULL;
+          scritta_winast();
           printf("\vPremi invio per terminare questa partita e tornare al menù---");
-          //while(getchar()!= '\n');//pulisco il buffer
           getchar();//aspetto che venga inserito qualcosa
         }
         if (numastro==numimpo) {
           system("clear");
-          printf("\vGli impostori hanno vinto dato che il numero degli impostori è uguale a quello degli astronauti \n");
+          printf("\vGli impostori hanno vinto dato che il numero degli impostori è uguale a quello\ndegli astronauti \n");
           scan=NULL;
           lista_stanze=NULL;
+          scritta_winimp();
           printf("\vPremi invio per terminare questa partita e tornare al menù---");
-          //while(getchar()!= '\n');//pulisco il buffer
           getchar();//aspetto che venga inserito qualcosa
         }
       } while(scan!=NULL);
@@ -934,5 +979,31 @@ printf("⣄⠄⠄⠄⠄⠸⣿⣿⣿⡿⠿⠟⠛⠉⠙⠛⠛⠛⠿⣿⣿⣿⣿⣿
 printf("⣿⡆⠄⠄⡀⠄⣿⡇⠈⠒⠄⠄⠄⠄⠄⠄⠄⠄⠄⠘⠛⣿⣿⠋⢀⠠⠄⢀\n\t");
 printf("⣿⣿⠄⠄⠄⢾⣿⣿⣷⠄⠹⣷⣤⣤⣄⣀⣠⣶⣶⣦⣾⣿⡿⠄⠄⠄⢠⣾\n\t");
 printf("⣿⣿⡆⠄⠄⠈⠙⢿⣉⠄⠄⠉⠻⠿⢿⣿⠿⠋⠉⣿⣿⣟⣥⠄⢀⣰⣿⣿\n\t");
-printf("⣿⣿⣧⡀⠄⠄⠄⠄⠻⠶⠄⢠⡄⠄⠄⠄⠄⢰⣿⠿⢉⣿⣿⣴⣾⣿⣿⣿\n\t");
+printf("⣿⣿⣧⡀⠄⠄⠄⠄⠻⠶⠄⢠⡄⠄⠄⠄⠄⢰⣿⠿⢉⣿⣿⣴⣾⣿⣿⣿\n");
+}
+
+static void scritta_winimp(){
+printf("\v\t⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠿⠿⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿\n\t");
+printf("⣿⣿⣿⣿⣿⣿⣿⠛⢩⣴⣶⣶⣶⣌⠙⠫⠛⢋⣭⣤⣤⣤⣤⡙⣿⣿⣿⣿⣿⣿\n\t");
+printf("⣿⣿⣿⣿⣿⡟⢡⣾⣿⠿⣛⣛⣛⣛⣛⡳⠆⢻⣿⣿⣿⠿⠿⠷⡌⠻⣿⣿⣿⣿\n\t");
+printf("⣿⣿⣿⣿⠏⣰⣿⣿⣴⣿⣿⣿⡿⠟⠛⠛⠒⠄⢶⣶⣶⣾⡿⠶⠒⠲⠌⢻⣿⣿\n\t");
+printf("⣿⣿⠏⣡⢨⣝⡻⠿⣿⢛⣩⡵⠞⡫⠭⠭⣭⠭⠤⠈⠭⠒⣒⠩⠭⠭⣍⠒⠈⠛\n\t");
+printf("⡿⢁⣾⣿⣸⣿⣿⣷⣬⡉⠁⠄⠁⠄⠄⠄⠄⠄⠄⠄⣶⠄⠄⠄⠄⠄⠄⠄⠄⢀\n\t");
+printf("⢡⣾⣿⣿⣿⣿⣿⣿⣿⣧⡀⠄⠄⠄⠄⠄⠄⠄⢀⣠⣿⣦⣤⣀⣀⣀⣀⠄⣤⣾\n\t");
+printf("⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⣶⣶⡶⢇⣰⣿⣿⣟⠿⠿⠿⠿⠟⠁⣾⣿⣿\n\t");
+printf("⣿⣿⣿⣿⣿⣿⣿⡟⢛⡛⠿⠿⣿⣧⣶⣶⣿⣿⣿⣿⣿⣷⣼⣿⣿⣿⣧⠸⣿⣿\n\t");
+printf("⠘⢿⣿⣿⣿⣿⣿⡇⢿⡿⠿⠦⣤⣈⣙⡛⠿⠿⠿⣿⣿⣿⣿⠿⠿⠟⠛⡀⢻⣿\n\t");
+printf("⠄⠄⠉⠻⢿⣿⣿⣷⣬⣙⠳⠶⢶⣤⣍⣙⡛⠓⠒⠶⠶⠶⠶⠖⢒⣛⣛⠁⣾⣿\n\t");
+printf("⠄⠄⠄⠄⠄⠈⠛⠛⠿⠿⣿⣷⣤⣤⣈⣉⣛⣛⣛⡛⠛⠛⠿⠿⠿⠟⢋⣼⣿⣿\n\t");
+printf("⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠈⠉⠉⣻⣿⣿⣿⣿⡿⠿⠛⠃⠄⠙⠛⠿⢿⣿\n\t");
+printf("⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⢬⣭⣭⡶⠖⣢⣦⣀⠄⠄⠄⠄⢀⣤⣾⣿\n\t");
+printf("⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⠄⢰⣶⣶⣶⣾⣿⣿⣿⣿⣷⡄⠄⢠⣾⣿⣿⣿\n");
+}
+
+static void scritta_winast(){
+printf("              . 　。　　　　•　 　ﾟ　　。 　　.\n\t");
+printf("   　　　.　　　 　　.　　　　　。　　 。　. 　.　　   \n\t");
+printf("。　 ඞ 。　 . • . Impostori defenestrati. . . 　 。\n\t");
+printf("     　. 　 　　。　　　　　　ﾟ　　　.　　　　　. ,　\n\t");
+printf("　　　.　 .　　 . 。　 ඞ 。　 . • . 。　  . • . \n");
 }
