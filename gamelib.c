@@ -26,7 +26,7 @@ static char *colore(struct Giocatore* scan){//per far tornare il colore in base 
          strcpy(color, "\033[1;34mblu\033[0m");
          break;
     case 2:
-         strcpy(color, "\033[0;33mgiallo\033[0m");
+         strcpy(color, "\033[1;33mgiallo\033[0m");
          break;
     case 3:
          strcpy(color, "\033[1;32mverde\033[0m");
@@ -41,7 +41,7 @@ static char *colore(struct Giocatore* scan){//per far tornare il colore in base 
          strcpy(color, "\033[1;95mviola\033[0m");
          break;
     case 7:
-         strcpy(color, "\033[1;33mmarrone\033[0m");
+         strcpy(color, "\033[0;33mmarrone\033[0m");
          break;
     case 8:
          strcpy(color, "\033[1;39mbianco\033[0m");
@@ -836,6 +836,7 @@ do{//faccio un cilo infinito perchè i round lo sono, ma quando finiscono le que
             printf("Non ci sono giocatori nella tua stanza\n");
         scelta=0;
         f=0;
+        printf("\nNumero delle quest rimanenti: %hu\n",quest_da_finire );
         if (!scan->stato) {//entra quando è 0
           do {//menu per gli astronauti
             if (f)//entra se f è diverso da 0
