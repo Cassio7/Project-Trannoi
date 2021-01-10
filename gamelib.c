@@ -445,7 +445,7 @@ static void chiamata_emergenza(struct Giocatore* scan){
   }
   else{
     int a=0;
-    if (flag1==0) {
+    if (flag1==0) {//se ci sono 0 astro esce 1 impostore a caso
       a=rand()%flag2;//numero random tra 0 e il numero degli imposori nella stanza
       for (int i=0;i<flag2;i++) {
         if (a==i) {
@@ -455,7 +455,7 @@ static void chiamata_emergenza(struct Giocatore* scan){
         }
       }
     }
-    else{
+    else{ //se ci sono 0 impo esce 1 astronauta a caso
       a=rand()%flag1;//numero random tra 0 e il numero degli astronauti nella stanza
       for (int i=0;i<flag1;i++) {
         if (a==i) {
