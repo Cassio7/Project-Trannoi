@@ -242,8 +242,6 @@ static void esegui_quest(struct Giocatore* scan){
   if (scan->posizione->tipo==1){//controllo se è quest_semplice
     int complete=0,sceltaa=999;//complete=flag minigame completato,sceltaa=scelta dell'utente
     printf("\vInserisci il risultato di questa somma per eseguire la quest semplice\n");
-    time_t t;//per il random
-    srand((unsigned) time(&t));//per il random
     int a=1+rand()%100;//primo numero random per la somma
     int b=1+rand()%100;//secondo numero random per la somma
     printf("\nHai la possibilità di uscire dal tentativo inserendo 0\nperò causa il non completamento della quest\n");
@@ -270,8 +268,6 @@ static void esegui_quest(struct Giocatore* scan){
     if (scan->posizione->tipo==2){//controllo se è quest_compicata
       int complete=0,sceltaa=0;//complete=flag minigame completato,sceltaa=scelta dell'utente
       printf("\vIndovina la sequenza di 5 numeri (da 1 a 5) per eseguire la quest complicata\n");
-      time_t t;//per il random
-      srand((unsigned) time(&t));//per il random
       int seq[5];
       for (int i = 0; i < 5; i++) { // numeri random senza ripetizione per stabilire il mini-game
         seq[i]= 1+rand()%5;
@@ -351,91 +347,45 @@ static void chiamata_emergenza(struct Giocatore* scan){
     for (int i=0;i<flag; i++) {
       printf("L'astronauta di colore %s\n",colore(morto[i]));
     }
-    int prob=0,prob1=0;//prob=probabilità per gli astronauti, prob1=probabilità per gli impostori
-    if (flag1!=0){//se ci sta almeno 1 astronauta
-      prob+=30;//aumento la prob del 30% dato che almeno 1 ci sta
-      for(int i=0;i<flag2;i++) {//ciclo per aggiungere il 20% per ogni impostore nella stanza
-        prob+=20;
-      }
-      for(int i=0;i<flag1-1;i++) {//ciclo per togliere il 30% per ogni astronauta nella stanza lui escluso
-        prob-=30;
-      }
-    }
-    printf("probabilità per gli astronauti %d\n",prob);
-    if (flag2!=0){//se ci sta almeno 1 impostore
-      prob1+=30;//aumento la prob del 30% dato che almeno 1 ci sta
-      for(int i=0;i<flag1;i++) {////ciclo per aggiungere il 20% per ogni astronauta nella stanza
-        prob1+=20;
-      }
-      for(int i=0;i<flag2-1;i++) {//ciclo per togliere il 30% per ogni impostore nella stanza lui escluso
-        prob1-=30;
-      }
-    }
-    printf("probabilità per gli impostori %d\n",prob1);
-    time_t t;//per il random
-    srand((unsigned) time(&t));//per il random
-    int a=0;
-    /*
-    a=prob+prob1;//metto la somma delle prob dentro a
-    int b=rand()%a;//faccio un numero random tra la somma delle probabilità
-    printf("%d\n",b);
-    if (b<prob) {//se il numero random è minore della prob degli astronauti esce un astronauta da 0 a prob-1
-      a=rand()%flag1;//numero random tra 0 e il numero degli astronauti nella stanza
-      for (int i=0;i<flag1;i++) {
-        if (a==i) {
-          astro[i]->stato=3;
-          printf("\nÈ stato defenestrato randomicamente l'astronauta di colore %s\n",colore(astro[i]));
-          i=flag1;
+    if (flag1!=0&&flag2!=0){//devono esserci almeno 1 astro e 1 impo
+      int prob=0,prob1=0;//prob=probabilità per gli astronauti, prob1=probabilità per gli impostori
+      if (flag1!=0){//se ci sta almeno 1 astronauta
+        prob+=30;//aumento la prob del 30% dato che almeno 1 ci sta
+        for(int i=0;i<flag2;i++) {//ciclo per aggiungere il 20% per ogni impostore nella stanza
+          prob+=20;
+        }
+        for(int i=0;i<flag1-1;i++) {//ciclo per togliere il 30% per ogni astronauta nella stanza lui escluso
+          prob-=30;
         }
       }
-    }
-    else{
-      if (b>=prob) {//se il numero random è maggiore o uguale alla prob degli astronauti esce un impostore da prob a prob1
-        a=rand()%flag2;//numero random tra 0 e il numero degli imposori nella stanza
-        for (int i=0;i<flag2;i++) {
+      printf("probabilità per gli astronauti %d\n",prob);
+      if (flag2!=0){//se ci sta almeno 1 impostore
+        prob1+=30;//aumento la prob del 30% dato che almeno 1 ci sta
+        for(int i=0;i<flag1;i++) {////ciclo per aggiungere il 20% per ogni astronauta nella stanza
+          prob1+=20;
+        }
+        for(int i=0;i<flag2-1;i++) {//ciclo per togliere il 30% per ogni impostore nella stanza lui escluso
+          prob1-=30;
+        }
+      }
+      printf("probabilità per gli impostori %d\n",prob1);
+      int a=0;
+      /*
+      a=prob+prob1;//metto la somma delle prob dentro a
+      int b=rand()%a;//faccio un numero random tra la somma delle probabilità
+      printf("%d\n",b);
+      if (b<prob) {//se il numero random è minore della prob degli astronauti esce un astronauta da 0 a prob-1
+        a=rand()%flag1;//numero random tra 0 e il numero degli astronauti nella stanza
+        for (int i=0;i<flag1;i++) {
           if (a==i) {
-            impo[i]->stato=3;
-            printf("\nÈ stato defenestrato randomicamente l'impostore di colore %s\n",colore(impo[i]));
-            i=flag2;
+            astro[i]->stato=3;
+            printf("\nÈ stato defenestrato randomicamente l'astronauta di colore %s\n",colore(astro[i]));
+            i=flag1;
           }
         }
       }
-    }*/
-    if (prob>prob1) {//se la prob degli astronauti è maggiore di quella degli impostori esce un astronauta a caso
-      a=rand()%flag1;//numero random tra 0 e il numero degli astronauti nella stanza
-      for (int i=0;i<flag1;i++) {
-        if (a==i) {
-          astro[i]->stato=3;
-          printf("\nÈ stato defenestrato randomicamente l'astronauta di colore %s\n",colore(astro[i]));
-          i=flag1;
-        }
-      }
-    }
-    else{
-      if (prob1>prob){//se la prob degli impostori è maggiore di quella degli astronauti esce un impostore a caso
-        a=rand()%flag2;//numero random tra 0 e il numero degli imposori nella stanza
-        for (int i=0;i<flag2;i++) {
-          if (a==i) {
-            impo[i]->stato=3;
-            printf("\nÈ stato defenestrato randomicamente l'impostore di colore %s\n",colore(impo[i]));
-            i=flag2;
-          }
-        }
-      }
-      else{//se la probabilità è uguale esce un astronauta o un impostore a caso
-        printf("Il numero degli impostori e astronauti nella stanza è uguale, quindi ne esce uno a caso tra i due\n");
-        a=rand()%2;
-        if (a==0) {//se è 0 esce un astronauta
-          a=rand()%flag1;//numero random tra 0 e il numero degli astronauti nella stanza
-          for (int i=0;i<flag1;i++) {
-            if (a==i) {
-              astro[i]->stato=3;
-              printf("\nÈ stato defenestrato randomicamente l'astronauta di colore %s\n",colore(astro[i]));
-              i=flag1;
-            }
-          }
-        }
-        else{//esce un impostore
+      else{
+        if (b>=prob) {//se il numero random è maggiore o uguale alla prob degli astronauti esce un impostore da prob a prob1
           a=rand()%flag2;//numero random tra 0 e il numero degli imposori nella stanza
           for (int i=0;i<flag2;i++) {
             if (a==i) {
@@ -445,8 +395,77 @@ static void chiamata_emergenza(struct Giocatore* scan){
             }
           }
         }
+      }*/
+      if (prob>prob1) {//se la prob degli astronauti è maggiore di quella degli impostori esce un astronauta a caso
+        a=rand()%flag1;//numero random tra 0 e il numero degli astronauti nella stanza
+        for (int i=0;i<flag1;i++) {
+          if (a==i) {
+            astro[i]->stato=3;
+            printf("\nÈ stato defenestrato randomicamente l'astronauta di colore %s\n",colore(astro[i]));
+            i=flag1;
+          }
+        }
+      }
+      else{
+        if (prob1>prob){//se la prob degli impostori è maggiore di quella degli astronauti esce un impostore a caso
+          a=rand()%flag2;//numero random tra 0 e il numero degli imposori nella stanza
+          for (int i=0;i<flag2;i++) {
+            if (a==i) {
+              impo[i]->stato=3;
+              printf("\nÈ stato defenestrato randomicamente l'impostore di colore %s\n",colore(impo[i]));
+              i=flag2;
+            }
+          }
+        }
+        else{//se la probabilità è uguale esce un astronauta o un impostore a caso
+          printf("Il numero degli impostori e astronauti nella stanza è uguale, quindi ne esce uno a caso tra i due\n");
+          a=rand()%2;
+          if (a==0) {//se è 0 esce un astronauta
+            a=rand()%flag1;//numero random tra 0 e il numero degli astronauti nella stanza
+            for (int i=0;i<flag1;i++) {
+              if (a==i) {
+                astro[i]->stato=3;
+                printf("\nÈ stato defenestrato randomicamente l'astronauta di colore %s\n",colore(astro[i]));
+                i=flag1;
+              }
+            }
+          }
+          else{//esce un impostore
+            a=rand()%flag2;//numero random tra 0 e il numero degli imposori nella stanza
+            for (int i=0;i<flag2;i++) {
+              if (a==i) {
+                impo[i]->stato=3;
+                printf("\nÈ stato defenestrato randomicamente l'impostore di colore %s\n",colore(impo[i]));
+                i=flag2;
+              }
+            }
+          }
+        }
+      }
+  }
+  else{
+    int a=0;
+    if (flag1==0) {
+      a=rand()%flag2;//numero random tra 0 e il numero degli imposori nella stanza
+      for (int i=0;i<flag2;i++) {
+        if (a==i) {
+          impo[i]->stato=3;
+          printf("\nÈ stato defenestrato randomicamente l'impostore di colore %s\n",colore(impo[i]));
+          i=flag2;
+        }
       }
     }
+    else{
+      a=rand()%flag1;//numero random tra 0 e il numero degli astronauti nella stanza
+      for (int i=0;i<flag1;i++) {
+        if (a==i) {
+          astro[i]->stato=3;
+          printf("\nÈ stato defenestrato randomicamente l'astronauta di colore %s\n",colore(astro[i]));
+          i=flag1;
+        }
+      }
+    }
+  }
     scan->posizione->emergenza=1;
   }
   else
@@ -502,8 +521,6 @@ static void uccidi_astronauta(struct Giocatore* scan){
         temp=temp->next;//passo al prox giocatore
       }while(temp!=NULL);
     }
-    time_t t;//per il random
-    srand((unsigned) time(&t));//per il random
     int a=rand()%101;//numero random da 0 a 100
     if (a<=prob) {//se il numero random è inferiore della probabilità l'impostore viene defenestrato
       printf("\nSei stato defenestrato!!\n");
@@ -579,8 +596,6 @@ dove andare la scelta sarà solo 0 ma il num sarà 1 e la stanza 1 non esiste*/
         printf("Esiste solo la stanza iniziale, non puoi spostarti in nessun'altra stanza\n");
       }
       else{
-        time_t t;//per il random
-        srand((unsigned) time(&t));//per il random
         int a=rand()%num,b=0;
         do {
           if (a==b){
@@ -654,8 +669,7 @@ void imposta_gioco(){//funzione principale ove inizializzo il gioco con creazion
 termina_gioco();
 int scelta=0,rando=0,f=0;//n=numero di persone, scelta la uso come flag e per la scelta dell'utente, rando=random, f=errore a video
 n=0;
-time_t t;//per il random
-srand((unsigned) time(&t));//per il random
+
 do {
   if (f)//entra se f è diverso da 0
     printf("\n!Errore nell'inserimento!\n");
@@ -788,6 +802,7 @@ switch (scelta) {
 }
 
 void gioca(){//funzione principale per eseguire i comandi di gioco
+
   system("clear");
   int scelta=0,flag=1,f=0;//scelta per menu,flag per il numero del giocatore,f=errore a video
   printf("\v\t\t\t\033[1;31m   !!!ATTENZIONE!!!\033[0m\n\n\n");
@@ -958,6 +973,7 @@ void termina_gioco(){
     } while(stanza_inizio!=NULL);
   }
 }
+
 void scritta(){
 printf("\v\t\t\t\033[1;31m▄▄▄▄▄▄▄▄   ▄▄▄·  ▐ ▄  ▐ ▄       ▪  \n\t\t\t");
 printf("•██  ▀▄ █·▐█ ▀█ •█▌▐█•█▌▐█▪     ██ \n\t\t\t");

@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
 #include "gamelib.h"
+
 void menu(){
   int scelta=0, flag=0,flag1=0,flag2=0;
   do{
@@ -46,6 +48,8 @@ void menu(){
 }
 
 int main() {
+  time_t t;//per il random
+  srand((unsigned) time(&t));//per il random
   system("clear");
   scritta();
   menu();
