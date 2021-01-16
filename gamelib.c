@@ -304,7 +304,7 @@ static void esegui_quest(struct Giocatore* scan){
           }
         }
       }
-      if (sceltaa==0)
+      if (sceltaa==9)
         printf("\nNon hai completato la quest complicata!\n");
       else{
         quest_da_finire-=2;//scalo di 2
