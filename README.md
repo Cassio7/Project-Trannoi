@@ -1,7 +1,6 @@
 # Progetto-finale-2020-Trannoi
-Template progetto finale per l'esame di Programmazione Procedurale con Laboratorio a.a. 2020-2021.
+Template progetto finale per l'esame di Programmazione Procedurale con Laboratorio a.a. 2020-2021, Università di Perugia, Dip. Matematica ed Informatica.
 
-Inserire
 
 Nome: Alessio
 
